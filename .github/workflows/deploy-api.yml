@@ -1,0 +1,43 @@
+name: Deploy API
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/api/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/deploy-api.yml'
+  # 스키마 마이그레이션 후 수동 배포가 필요할 때
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-api
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm --filter @blogyu/api typecheck
+
+      # DB 마이그레이션은 여기서 돌리지 않는다.
+      # 롤백 전략이 없는 상태에서 자동 적용하면 실패 시 되돌릴 방법이 없다.
+      # `pnpm db:migrate` 를 로컬에서 먼저 돌리고 배포한다.
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/api
