@@ -1,0 +1,25 @@
+# 의존성
+node_modules/
+.pnpm-store/
+
+# 빌드 산출물
+.next/
+.open-next/
+dist/
+out/
+.turbo/
+
+# 환경 변수 — .env.example만 커밋한다
+.env
+.env.local
+.env.*.local
+
+# Cloudflare
+.wrangler/
+.dev.vars
+
+# 로그·캐시
+*.log
+.DS_Store
+coverage/
+*.tsbuildinfo
