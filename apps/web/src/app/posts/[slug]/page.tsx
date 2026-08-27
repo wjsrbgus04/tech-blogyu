@@ -1,13 +1,17 @@
+import type { InferResponseType } from 'hono/client'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Comments } from '@/components/comments'
-import { Reactions } from '@/components/reactions'
+import { LoadError } from '@/components/loadError'
+import { RelativeTime } from '@/components/relativeTime'
 import { Shell } from '@/components/shell'
 import { Sidebar } from '@/components/sidebar'
 import { Toc } from '@/components/toc'
+import { ViewCounter } from '@/components/viewCounter'
 import { api, cached, SITE_URL } from '@/lib/apiClient'
 import { formatDate, toIsoDate } from '@/lib/date'
+import { loadOrFail } from '@/lib/loadResult'
 import { renderMarkdown } from '@/lib/markdown'
 
 // Next 의 segment config 는 정적 리터럴만 인식한다 (apiClient 의 REVALIDATE_SECONDS 와 같은 값)
@@ -30,22 +34,21 @@ export async function generateStaticParams() {
   }
 }
 
-async function loadPost(slug: string) {
-  try {
-    const res = await api.posts[':slug'].$get({ param: { slug } }, cached([`post:${slug}`]))
-    if (!res.ok) return null
-    return await res.json()
-  } catch {
-    return null
-  }
+/** 백엔드 라우터에서 200 응답 타입을 그대로 가져온다 */
+type PostDetail = InferResponseType<(typeof api.posts)[':slug']['$get'], 200>
+
+function loadPost(slug: string) {
+  return loadOrFail<PostDetail>(() =>
+    api.posts[':slug'].$get({ param: { slug } }, cached([`post:${slug}`])),
+  )
 }
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { slug } = await params
-  const data = await loadPost(slug)
-  if (!data) return { title: '글을 찾을 수 없습니다' }
+  const result = await loadPost(slug)
+  if (!result.ok) return { title: '글을 찾을 수 없습니다' }
 
-  const { post, tags } = data
+  const { post, tags } = result.data
   const url = `${SITE_URL}/posts/${post.slug}`
 
   return {
@@ -74,10 +77,18 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 
 export default async function PostPage({ params }: { params: Promise<Params> }) {
   const { slug } = await params
-  const data = await loadPost(slug)
-  if (!data) notFound()
+  const result = await loadPost(slug)
+  // 글이 없는 것과 API 가 죽은 것을 구분한다
+  if (!result.ok && result.reason === 'notFound') notFound()
+  if (!result.ok) {
+    return (
+      <Shell sidebar={<Sidebar />}>
+        <LoadError label="글" />
+      </Shell>
+    )
+  }
 
-  const { post, tags, series, prev, next } = data
+  const { post, tags, series } = result.data
   const { html, toc } = await renderMarkdown(post.content)
 
   const jsonLd = {
@@ -102,12 +113,10 @@ export default async function PostPage({ params }: { params: Promise<Params> }) 
 
       <article className="max-w-[44rem]">
         <header className="mb-11 border-border border-b pb-8">
-          <p className="tabular mb-[1.1rem] flex flex-wrap gap-2 text-[0.8125rem] text-fg-faint">
+          {/* 날짜와 상대 표기만. 읽는 시간은 아래로 내려 둘을 섞지 않는다. */}
+          <p className="tabular mb-[1.1rem] flex flex-wrap items-baseline gap-2.5 text-[0.8125rem] text-fg-faint">
             <time dateTime={toIsoDate(post.publishedAt)}>{formatDate(post.publishedAt)}</time>
-            <span aria-hidden="true" className="opacity-50">
-              ·
-            </span>
-            <span>{post.readingMinutes}분</span>
+            <RelativeTime iso={toIsoDate(post.publishedAt) ?? null} />
           </p>
 
           <h1 className="mb-[1.1rem] font-bold text-[clamp(2rem,4.2vw,3.125rem)] leading-[1.26] tracking-[-0.008em]">
@@ -118,17 +127,24 @@ export default async function PostPage({ params }: { params: Promise<Params> }) 
             {post.excerpt}
           </p>
 
-          {tags.length > 0 && (
-            <ul className="flex flex-wrap gap-1.5">
-              {tags.map((tag) => (
-                <li key={tag}>
-                  <Link href={`/tags/${tag}`} className="chip">
-                    {tag}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            {tags.length > 0 ? (
+              <ul className="flex flex-wrap gap-1.5">
+                {tags.map((tag) => (
+                  <li key={tag}>
+                    <Link href={`/tags/${tag}`} className="chip">
+                      {tag}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <span />
+            )}
+            <span className="tabular text-[0.8125rem] text-fg-faint">
+              {post.readingMinutes}분 분량
+            </span>
+          </div>
         </header>
 
         {/* biome-ignore lint/security/noDangerouslySetInnerHtml: 본인이 작성한 마크다운을 서버에서 렌더한 HTML */}
@@ -164,40 +180,7 @@ export default async function PostPage({ params }: { params: Promise<Params> }) 
           </aside>
         )}
 
-        <Reactions
-          slug={post.slug}
-          initialViewCount={post.viewCount}
-          initialLikeCount={post.likeCount}
-        />
-
-        {(prev || next) && (
-          <nav aria-label="이전 다음 글" className="mt-8 grid grid-cols-2 gap-4 max-sm:grid-cols-1">
-            {prev ? (
-              <Link
-                href={`/posts/${prev.slug}`}
-                className="rounded-md border border-border px-[1.1rem] py-4 transition-colors hover:border-border-strong hover:bg-bg-subtle"
-              >
-                <span className="label mb-1.5 block">이전 글</span>
-                <span className="block font-[560] text-[0.875rem] leading-[1.55]">
-                  {prev.title}
-                </span>
-              </Link>
-            ) : (
-              <span />
-            )}
-            {next && (
-              <Link
-                href={`/posts/${next.slug}`}
-                className="rounded-md border border-border px-[1.1rem] py-4 text-right transition-colors hover:border-border-strong hover:bg-bg-subtle max-sm:text-left"
-              >
-                <span className="label mb-1.5 block">다음 글</span>
-                <span className="block font-[560] text-[0.875rem] leading-[1.55]">
-                  {next.title}
-                </span>
-              </Link>
-            )}
-          </nav>
-        )}
+        <ViewCounter slug={post.slug} />
 
         <section aria-label="댓글" className="mt-16 border-border border-t pt-8">
           <h2 className="mb-5 text-[0.9375rem]">댓글</h2>

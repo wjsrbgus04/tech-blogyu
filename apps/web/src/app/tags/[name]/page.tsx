@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { LoadError } from '@/components/loadError'
 import { Pagination } from '@/components/pagination'
 import { PostList, type PostSummary } from '@/components/postList'
 import { Shell } from '@/components/shell'
 import { Sidebar } from '@/components/sidebar'
 import { api, cached } from '@/lib/apiClient'
+import { loadOrFail } from '@/lib/loadResult'
 
 // Next 의 segment config 는 정적 리터럴만 인식한다 (apiClient 의 REVALIDATE_SECONDS 와 같은 값)
 export const revalidate = 300
@@ -25,20 +27,18 @@ export async function generateStaticParams() {
 }
 type Search = { page?: string }
 
-async function loadTag(name: string) {
-  try {
-    const res = await api.tags[':name'].$get({ param: { name } }, cached(['tags']))
-    return res.ok ? await res.json() : null
-  } catch {
-    return null
-  }
+type Tag = { name: string; description: string | null; count: number }
+
+function loadTag(name: string) {
+  return loadOrFail<Tag>(() => api.tags[':name'].$get({ param: { name } }, cached(['tags'])))
 }
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { name } = await params
-  const tag = await loadTag(decodeURIComponent(name))
-  if (!tag) return { title: '태그를 찾을 수 없습니다' }
+  const result = await loadTag(decodeURIComponent(name))
+  if (!result.ok) return { title: '태그를 찾을 수 없습니다' }
 
+  const tag = result.data
   // 태그마다 고유한 description 을 준다 — 검색 유입 경로가 되기 때문이다
   const description = tag.description ?? `${tag.name} 태그가 붙은 글 ${tag.count}편.`
   return {
@@ -58,8 +58,17 @@ export default async function TagArchivePage({
   const name = decodeURIComponent((await params).name)
   const page = Math.max(1, Number((await searchParams).page ?? '1') || 1)
 
-  const tag = await loadTag(name)
-  if (!tag) notFound()
+  const result = await loadTag(name)
+  // 태그가 없는 것과 API 가 죽은 것을 구분한다
+  if (!result.ok && result.reason === 'notFound') notFound()
+  if (!result.ok) {
+    return (
+      <Shell sidebar={<Sidebar />}>
+        <LoadError label="태그" />
+      </Shell>
+    )
+  }
+  const tag = result.data
 
   let posts: PostSummary[] = []
   let totalPages = 1
