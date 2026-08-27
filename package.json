@@ -1,0 +1,29 @@
+{
+  "name": "tech-blogyu",
+  "private": true,
+  "packageManager": "pnpm@11.1.1",
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "db:generate": "pnpm --filter @blogyu/api db:generate",
+    "db:migrate": "pnpm --filter @blogyu/api db:migrate",
+    "db:studio": "pnpm --filter @blogyu/api db:studio",
+    "db:up": "docker compose up -d --wait",
+    "db:down": "docker compose down",
+    "db:reset": "docker compose down -v && docker compose up -d --wait",
+    "db:seed": "pnpm --filter @blogyu/api db:seed"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.10",
+    "turbo": "^2.10.12",
+    "typescript": "^5.9.3"
+  }
+}
