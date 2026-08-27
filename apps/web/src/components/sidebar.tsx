@@ -122,7 +122,7 @@ export async function Sidebar({ toc }: { toc?: ReactNode }) {
           RSS
         </a>
         <a
-          href="https://github.com/hxxnim"
+          href="https://github.com/wjsrbgus04"
           target="_blank"
           rel="noreferrer"
           className="transition-colors hover:text-fg"
