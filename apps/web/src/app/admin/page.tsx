@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import { AdminBar } from '@/components/admin/adminBar'
+import { StatusPill } from '@/components/admin/statusPill'
 import { api, uncached } from '@/lib/apiClient'
 import { formatDate } from '@/lib/date'
 
@@ -23,13 +24,21 @@ type Row = {
 const FILTERS: { key: Filter; label: string }[] = [
   { key: 'all', label: '전체' },
   { key: 'published', label: '발행' },
+  { key: 'scheduled', label: '예약' },
   { key: 'draft', label: '임시' },
 ]
 
-const STATUS_LABEL: Record<Status, string> = {
-  published: '발행됨',
-  draft: '임시저장',
-  scheduled: '예약됨',
+/**
+ * 화면에 보여줄 상태.
+ *
+ * 예약한 시각이 지나면 글은 이미 공개돼 있다. 그런데 status 컬럼은
+ * 'scheduled' 그대로라, 값만 믿고 "예약됨"이라 쓰면 이미 나간 글을
+ * 아직 안 나간 것처럼 보여주게 된다. 시각을 함께 봐야 한다.
+ */
+function displayStatus(row: Pick<Row, 'status' | 'publishedAt'>): Status {
+  if (row.status !== 'scheduled') return row.status
+  if (!row.publishedAt) return 'scheduled'
+  return new Date(row.publishedAt) > new Date() ? 'scheduled' : 'published'
 }
 
 export default function AdminPostsPage() {
@@ -46,6 +55,10 @@ export default function AdminPostsPage() {
     setError(null)
     try {
       const res = await api.admin.posts.$get({ query: { status: filter } }, uncached)
+      if (res.status === 401) throw new Error('세션이 만료됐습니다. 다시 로그인해 주세요.')
+      if (res.status === 403) {
+        throw new Error('이 계정은 허용 목록에 없습니다. ADMIN_GITHUB_LOGINS 를 확인해 주세요.')
+      }
       if (!res.ok) throw new Error('목록을 불러오지 못했습니다.')
       const data = await res.json()
       setRows(data.items as Row[])
@@ -130,7 +143,7 @@ export default function AdminPostsPage() {
 
         {loading ? (
           <p className="py-16 text-center text-[0.875rem] text-fg-faint">불러오는 중…</p>
-        ) : rows.length === 0 ? (
+        ) : error ? null : rows.length === 0 ? (
           <p className="py-16 text-center text-[0.875rem] text-fg-faint">글이 없습니다.</p>
         ) : (
           <table className="w-full border-collapse text-[0.875rem]">
@@ -170,23 +183,18 @@ export default function AdminPostsPage() {
                   </td>
 
                   <td className="border-border border-b px-2.5 py-3.5 align-middle">
-                    <span
-                      className={
-                        row.status === 'published'
-                          ? 'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-accent-weak px-2 py-0.5 text-[0.75rem] text-accent-ink'
-                          : 'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border px-2 py-0.5 text-[0.75rem] text-fg-muted'
-                      }
-                    >
-                      <span
-                        aria-hidden="true"
-                        className={`size-[5px] rounded-full ${row.status === 'published' ? 'bg-accent' : 'bg-fg-faint'}`}
-                      />
-                      {STATUS_LABEL[row.status]}
-                    </span>
+                    <StatusPill status={displayStatus(row)} />
                   </td>
 
-                  <td className="border-border border-b px-2.5 py-3.5 align-middle text-[0.8125rem] text-fg-faint max-sm:hidden">
-                    {row.publishedAt ? formatDate(row.publishedAt) : '—'}
+                  <td className="border-border border-b px-2.5 py-3.5 align-middle text-[0.8125rem] max-sm:hidden">
+                    {displayStatus(row) === 'scheduled' ? (
+                      // 아직 안 나간 글은 언제 나가는지가 날짜보다 중요하다
+                      <span className="text-accent-ink">{formatDate(row.publishedAt)} 예정</span>
+                    ) : (
+                      <span className="text-fg-faint">
+                        {row.publishedAt ? formatDate(row.publishedAt) : '—'}
+                      </span>
+                    )}
                   </td>
                   <td className="tabular border-border border-b px-2.5 py-3.5 text-right align-middle text-fg-muted max-sm:hidden">
                     {row.viewCount.toLocaleString('ko-KR')}

@@ -155,14 +155,36 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
     setTagInput('')
   }
 
+  /**
+   * 예약은 미래 시각이 있어야 성립한다. 시각이 비었거나 지난 시각이면
+   * 서버가 지금 시각으로 채워 즉시 공개해버리므로 저장 전에 막는다.
+   */
+  function scheduleProblem(next: Status): string | null {
+    if (next !== 'scheduled') return null
+    if (!value.publishedAt) return '예약하려면 발행 시각을 지정해 주세요.'
+    if (new Date(value.publishedAt) <= new Date()) {
+      return '예약 시각이 이미 지났습니다. 지금보다 뒤의 시각을 골라주세요.'
+    }
+    return null
+  }
+
   async function save(nextStatus?: Status) {
+    const resolved = nextStatus ?? value.status
+
+    const problem = scheduleProblem(resolved)
+    if (problem) {
+      setError(problem)
+      setStatus(null)
+      return
+    }
+
     setSaving(true)
     setError(null)
     setStatus(null)
 
     const body = {
       ...value,
-      status: nextStatus ?? value.status,
+      status: resolved,
       coverImageUrl: value.coverImageUrl || null,
       publishedAt: value.publishedAt || null,
       seriesId: value.seriesId || null,
@@ -180,10 +202,19 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
 
       const saved = (await res.json()) as { id: string }
       setDirty(false)
-      setStatus('저장했습니다.')
-      if (nextStatus) setValue((prev) => ({ ...prev, status: nextStatus }))
+      setStatus(resolved === 'scheduled' ? '예약했습니다.' : '저장했습니다.')
+      setValue((prev) => ({ ...prev, status: resolved }))
 
-      if (!postId) router.replace(`/admin/posts/${saved.id}`)
+      if (resolved === 'draft') {
+        // 임시저장은 아직 쓰는 중이므로 편집 화면에 머문다.
+        // 새 글이면 주소만 편집 URL 로 바꿔 새로고침해도 이어서 쓸 수 있게 한다.
+        if (!postId) router.replace(`/admin/posts/${saved.id}`)
+        return
+      }
+
+      // 발행·예약은 한 편이 끝난 것이다. 목록으로 돌려보내면 방금 올린 글이
+      // 맨 위에 보여서 결과 확인과 다음 작업이 한 화면에서 이어진다.
+      router.push('/admin')
     } catch (err) {
       setError(err instanceof Error ? err.message : '저장에 실패했습니다.')
     } finally {
@@ -232,10 +263,12 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
             <button
               type="button"
               disabled={saving}
-              onClick={() => save('published')}
+              /* 라디오에서 고른 상태가 곧 발행 방식이다. 여기서 'published' 를
+                 강제하면 예약을 골라도 즉시 발행으로 저장돼 버린다. */
+              onClick={() => save(value.status === 'draft' ? 'published' : value.status)}
               className="cursor-pointer rounded-sm border border-accent bg-accent px-3.5 py-2 font-[600] text-[0.8125rem] text-accent-fg transition-[filter] hover:brightness-105 disabled:opacity-50"
             >
-              {saving ? '저장 중…' : '발행'}
+              {saving ? '저장 중…' : value.status === 'scheduled' ? '예약 발행' : '발행'}
             </button>
           </div>
         </div>
@@ -254,7 +287,7 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
           value={value.title}
           onChange={(event) => patch({ title: event.target.value })}
           placeholder="제목"
-          className="mb-5 w-full border-border border-b bg-transparent pb-4 font-bold text-[1.75rem] leading-[1.4] tracking-[-0.008em] outline-none placeholder:text-fg-faint focus:border-accent"
+          className="no-focus-underline mb-5 w-full border-border border-b bg-transparent pb-4 font-bold text-[1.75rem] leading-[1.4] tracking-[-0.008em] outline-none placeholder:text-fg-faint focus:border-accent"
         />
 
         <div className="grid grid-cols-[minmax(0,1fr)_17.5rem] items-start gap-8 max-lg:block">
