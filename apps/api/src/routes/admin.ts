@@ -1,11 +1,12 @@
 import { zValidator } from '@hono/zod-validator'
-import { desc, eq, inArray, sql } from 'drizzle-orm'
+import { and, desc, eq, inArray, lte, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import { requireAdmin } from '../auth/session'
 import type { Db } from '../db/client'
 import { posts, postsToTags, series, tags } from '../db/schema'
 import type { AdminUser, Bindings } from '../lib/env'
+import { PG_UNIQUE_VIOLATION, pgConstraint, pgErrorCode } from '../lib/errors'
 import {
   adminListQuerySchema,
   idParamSchema,
@@ -13,6 +14,7 @@ import {
   postPatchSchema,
 } from '../lib/schemas'
 import { estimateReadingMinutes } from '../lib/text'
+import { validationHook } from '../lib/validate'
 
 type Env = { Bindings: Bindings; Variables: { db: Db; admin: AdminUser } }
 
@@ -62,6 +64,35 @@ async function syncTags(db: Db, postId: string, names: string[]): Promise<void> 
   await db.insert(postsToTags).values(rows.map((row) => ({ postId, tagId: row.id })))
 }
 
+/**
+ * 슬러그가 겹치면 Postgres 가 unique 제약 위반을 던진다.
+ * 그대로 두면 500 "서버 오류"가 나가서, 고칠 수 있는 문제인데도
+ * 사용자는 자기 입력이 잘못된 줄 모른다. 409 로 바꿔 이유를 알려준다.
+ */
+function rethrowAsConflict(error: unknown): never {
+  if (pgErrorCode(error) === PG_UNIQUE_VIOLATION && pgConstraint(error)?.includes('slug')) {
+    throw new HTTPException(409, {
+      message: '이미 쓰이고 있는 주소입니다. 슬러그를 다르게 지어주세요.',
+    })
+  }
+  throw error
+}
+
+/**
+ * 예약은 미래 시각이 있어야 성립한다.
+ * 시각이 없거나 이미 지났으면 resolvePublishedAt 이 지금 시각을 채워
+ * 즉시 공개돼 버린다 — 예약한 사람의 의도와 정반대다.
+ * 화면에서도 막지만 서버가 마지막 관문이다.
+ */
+function assertSchedulable(status: 'draft' | 'published' | 'scheduled', publishedAt: Date | null) {
+  if (status !== 'scheduled') return
+  if (!publishedAt || publishedAt <= new Date()) {
+    throw new HTTPException(400, {
+      message: '예약하려면 지금보다 뒤의 발행 시각을 지정해야 합니다.',
+    })
+  }
+}
+
 /** 발행 상태에 따라 publishedAt 을 정한다. 예약이면 입력값을 그대로 쓴다. */
 function resolvePublishedAt(
   status: 'draft' | 'published' | 'scheduled',
@@ -77,9 +108,22 @@ export const adminRoute = new Hono<Env>()
   .use('*', requireAdmin)
 
   /** 어드민 목록 — 임시저장까지 전부 보여준다. */
-  .get('/posts', zValidator('query', adminListQuerySchema), async (c) => {
+  .get('/posts', zValidator('query', adminListQuerySchema, validationHook), async (c) => {
     const { status, page, limit } = c.req.valid('query')
     const db = c.get('db')
+
+    /**
+     * 예약 시각이 지난 글은 독자에게 이미 공개돼 있다. 그런데 status 는
+     * 'scheduled' 그대로라 목록에서 "예약 2편"처럼 세어져 실제와 어긋난다.
+     * 크론을 두는 대신 어드민을 열 때 스스로 맞춘다 — 대상이 없으면
+     * 아무 행도 건드리지 않으므로 매번 돌아도 부담이 없다.
+     * updatedAt 은 손대지 않는다. 정렬이 흔들리면 안 된다.
+     */
+    await db
+      .update(posts)
+      .set({ status: 'published' })
+      .where(and(eq(posts.status, 'scheduled'), lte(posts.publishedAt, sql`now()`)))
+
     const where = status === 'all' ? undefined : eq(posts.status, status)
 
     const [rows, [counted]] = await Promise.all([
@@ -115,7 +159,7 @@ export const adminRoute = new Hono<Env>()
   })
 
   /** 편집 화면이 여는 단건 — 임시저장도 읽을 수 있어야 한다. */
-  .get('/posts/:id', zValidator('param', idParamSchema), async (c) => {
+  .get('/posts/:id', zValidator('param', idParamSchema, validationHook), async (c) => {
     const { id } = c.req.valid('param')
     const db = c.get('db')
 
@@ -131,9 +175,11 @@ export const adminRoute = new Hono<Env>()
     return c.json({ post, tags: postTags.map((row) => row.name) })
   })
 
-  .post('/posts', zValidator('json', postInputSchema), async (c) => {
+  .post('/posts', zValidator('json', postInputSchema, validationHook), async (c) => {
     const input = c.req.valid('json')
     const db = c.get('db')
+
+    assertSchedulable(input.status, input.publishedAt ? new Date(input.publishedAt) : null)
 
     const [created] = await db
       .insert(posts)
@@ -150,6 +196,7 @@ export const adminRoute = new Hono<Env>()
         seriesOrder: input.seriesOrder ?? null,
       })
       .returning({ id: posts.id, slug: posts.slug })
+      .catch(rethrowAsConflict)
 
     if (!created) throw new HTTPException(500, { message: '글 저장에 실패했습니다.' })
 
@@ -161,8 +208,8 @@ export const adminRoute = new Hono<Env>()
 
   .patch(
     '/posts/:id',
-    zValidator('param', idParamSchema),
-    zValidator('json', postPatchSchema),
+    zValidator('param', idParamSchema, validationHook),
+    zValidator('json', postPatchSchema, validationHook),
     async (c) => {
       const { id } = c.req.valid('param')
       const input = c.req.valid('json')
@@ -177,6 +224,9 @@ export const adminRoute = new Hono<Env>()
       if (!existing) throw new HTTPException(404, { message: '글을 찾을 수 없습니다.' })
 
       const status = input.status ?? existing.status
+      // status 만 바꾸고 시각은 그대로 둔 요청도 있으므로 병합 결과로 본다
+      const nextPublishedAt = resolvePublishedAt(status, input.publishedAt, existing.publishedAt)
+      assertSchedulable(status, nextPublishedAt)
 
       const [updated] = await db
         .update(posts)
@@ -192,11 +242,12 @@ export const adminRoute = new Hono<Env>()
           ...(input.seriesId !== undefined && { seriesId: input.seriesId ?? null }),
           ...(input.seriesOrder !== undefined && { seriesOrder: input.seriesOrder ?? null }),
           status,
-          publishedAt: resolvePublishedAt(status, input.publishedAt, existing.publishedAt),
+          publishedAt: nextPublishedAt,
           updatedAt: new Date(),
         })
         .where(eq(posts.id, id))
         .returning({ id: posts.id, slug: posts.slug })
+        .catch(rethrowAsConflict)
 
       if (!updated) throw new HTTPException(500, { message: '글 수정에 실패했습니다.' })
       if (input.tags) await syncTags(db, id, input.tags)
@@ -210,7 +261,7 @@ export const adminRoute = new Hono<Env>()
     },
   )
 
-  .delete('/posts/:id', zValidator('param', idParamSchema), async (c) => {
+  .delete('/posts/:id', zValidator('param', idParamSchema, validationHook), async (c) => {
     const { id } = c.req.valid('param')
 
     const [deleted] = await c

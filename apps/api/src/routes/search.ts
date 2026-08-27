@@ -1,14 +1,14 @@
 import { zValidator } from '@hono/zod-validator'
-import { and, desc, eq, lte, or, sql } from 'drizzle-orm'
+import { and, desc, or, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import type { Db } from '../db/client'
+import { isPublicPost as isPublic } from '../db/filters'
 import { posts } from '../db/schema'
 import type { Bindings } from '../lib/env'
 import { searchQuerySchema } from '../lib/schemas'
+import { validationHook } from '../lib/validate'
 
 type Env = { Bindings: Bindings; Variables: { db: Db } }
-
-const isPublic = and(eq(posts.status, 'published'), lte(posts.publishedAt, sql`now()`))
 
 /**
  * 제목·요약·본문을 ILIKE 로 훑는다.
@@ -20,7 +20,7 @@ const isPublic = and(eq(posts.status, 'published'), lte(posts.publishedAt, sql`n
  */
 export const searchRoute = new Hono<Env>().get(
   '/',
-  zValidator('query', searchQuerySchema),
+  zValidator('query', searchQuerySchema, validationHook),
   async (c) => {
     const { q, limit } = c.req.valid('query')
     // ILIKE 와일드카드로 해석되는 문자를 이스케이프한다

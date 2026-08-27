@@ -3,15 +3,14 @@ import { and, asc, desc, eq, inArray, lte, ne, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import type { Db } from '../db/client'
+import { isPublicPost as isPublic } from '../db/filters'
 import { postLikes, posts, postsToTags, series, tags } from '../db/schema'
 import type { Bindings } from '../lib/env'
 import { listQuerySchema, slugParamSchema } from '../lib/schemas'
 import { hashVisitor } from '../lib/text'
+import { validationHook } from '../lib/validate'
 
 type Env = { Bindings: Bindings; Variables: { db: Db } }
-
-/** 공개 목록에 나올 조건 — 발행 상태이면서 발행 시각이 지난 글. */
-const isPublic = and(eq(posts.status, 'published'), lte(posts.publishedAt, sql`now()`))
 
 /** 글 여러 건의 태그를 한 번에 가져와 id 별로 묶는다 (N+1 방지). */
 async function loadTagsByPost(db: Db, postIds: string[]): Promise<Map<string, string[]>> {
@@ -36,7 +35,7 @@ async function loadTagsByPost(db: Db, postIds: string[]): Promise<Map<string, st
 export const postsRoute = new Hono<Env>()
 
   /** 목록 — 태그·시리즈로 걸러 최신순. */
-  .get('/', zValidator('query', listQuerySchema), async (c) => {
+  .get('/', zValidator('query', listQuerySchema, validationHook), async (c) => {
     const { page, limit, tag, series: seriesSlug } = c.req.valid('query')
     const db = c.get('db')
     const offset = (page - 1) * limit
@@ -95,7 +94,7 @@ export const postsRoute = new Hono<Env>()
   })
 
   /** 상세 — 본문, 태그, 시리즈, 이전/다음 글을 한 번에 준다. */
-  .get('/:slug', zValidator('param', slugParamSchema), async (c) => {
+  .get('/:slug', zValidator('param', slugParamSchema, validationHook), async (c) => {
     const { slug } = c.req.valid('param')
     const db = c.get('db')
 
@@ -187,7 +186,7 @@ export const postsRoute = new Hono<Env>()
    * 조회수 +1. 중복 방지는 클라이언트가 sessionStorage 로 한 번만 호출해서 처리한다.
    * 정확한 통계가 목적이 아니라 "많이 읽힌 글"을 구분하는 게 목적이라 이 정도면 충분하다.
    */
-  .post('/:slug/view', zValidator('param', slugParamSchema), async (c) => {
+  .post('/:slug/view', zValidator('param', slugParamSchema, validationHook), async (c) => {
     const { slug } = c.req.valid('param')
     const [updated] = await c
       .get('db')
@@ -201,7 +200,7 @@ export const postsRoute = new Hono<Env>()
   })
 
   /** 좋아요 토글. 방문자 해시로 중복을 막는다. */
-  .post('/:slug/like', zValidator('param', slugParamSchema), async (c) => {
+  .post('/:slug/like', zValidator('param', slugParamSchema, validationHook), async (c) => {
     const { slug } = c.req.valid('param')
     const db = c.get('db')
 
