@@ -220,20 +220,28 @@
        중간에 탁한 회색을 거쳐 오히려 지저분하다. */
   }
 
-  /* 필름 그레인 — 눈에 띄면 실패한 것이다 */
-  body::after {
+  /* 배경 텍스처 — transparenttextures 의 grid-noise, 98x98 타일.
+     촘촘한 격자결이라 반복이 눈에 띄지 않고 결만 남는다.
+     X자 격자(elastoplast)나 45도 브러시(brushed-alum)는 패턴이 스스로
+     주장해서 읽는 화면에 맞지 않았다. 눈에 띄면 실패다. */
+  body::before {
     content: '';
     position: fixed;
     inset: 0;
-    z-index: 60;
+    /* 콘텐츠 아래에 깐다. 필름 그레인은 전체를 덮는 게 맞지만
+       격자 패턴이 글자 위에 얹히면 가독성을 갉아먹는다. */
+    z-index: -1;
     pointer-events: none;
-    opacity: 0.05;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-image: url('/textures/grid-noise.png');
+    background-repeat: repeat;
+    /* 패턴이 흰색이라 밝은 배경에서는 곱하기로 눌러야 결이 드러난다 */
+    mix-blend-mode: multiply;
+    opacity: 0.22;
   }
-  .dark body::after {
-    opacity: 0.065;
+  .dark body::before {
+    /* 격자선이 어두운 색이라 다크에서는 라이트보다 진하게 올려야 결이 보인다 */
     mix-blend-mode: normal;
+    opacity: 0.14;
   }
 
   h1, h2, h3, h4 {
@@ -246,10 +254,60 @@
     text-decoration: none;
   }
 
-  :is(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
-    outline: 2px solid var(--accent-ink);
-    outline-offset: 3px;
-    border-radius: 2px;
+  /* 테마 전환 순간에만 붙는다. 색 보간으로 생기는 깜빡임을 막는다. */
+  .theme-switching,
+  .theme-switching *,
+  .theme-switching *::before,
+  .theme-switching *::after {
+    transition: none !important;
+  }
+
+  /* ── 포커스 ────────────────────────────────────────────────
+     기본 outline 은 요소에서 떨어져 뜨는 색 띠라, 테두리가 이미 있는
+     입력창에서는 이중 테두리로 보인다. 요소에 붙는 표시로 바꾼다.
+
+     접근성상 포커스 표시는 없앨 수 없다(WCAG 2.4.7). 대비 3:1 을
+     만족하도록 액센트를 그대로 쓰되 두께와 붙는 위치만 손봤다. */
+
+  /* 누르는 것들 — 배경색 갭을 한 겹 두고 링이 퍼져 나온다 */
+  :is(a, button, summary, [tabindex]):focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px var(--bg),
+      0 0 0 3px var(--accent);
+    border-radius: var(--radius-sm);
+  }
+
+  /* 입력하는 것들 — 밑줄이 왼쪽에서 오른쪽으로 그어진다.
+     background-image 로 그리면 래퍼 엘리먼트 없이 input 하나로 끝난다. */
+  :is(input:not([type='checkbox']):not([type='radio']), textarea, select) {
+    background-image: linear-gradient(var(--accent), var(--accent));
+    background-repeat: no-repeat;
+    background-position: left bottom;
+    background-size: 0% 1.5px;
+    transition:
+      background-size var(--dur-base) var(--ease-out),
+      border-color var(--dur-fast) var(--ease-out),
+      background-color var(--dur-fast) var(--ease-out);
+  }
+
+  :is(input:not([type='checkbox']):not([type='radio']), textarea, select):focus {
+    outline: none;
+    background-size: 100% 1.5px;
+    border-color: var(--border-strong);
+  }
+
+  /* 이미 border-bottom 을 밑줄로 쓰는 요소는 라인이 두 겹이 된다 */
+  .no-focus-underline {
+    background-image: none;
+  }
+
+  /* 체크박스·라디오는 모양이 작아 밑줄이 안 보인다 — 링으로 간다 */
+  :is(input[type='checkbox'], input[type='radio']):focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px var(--bg),
+      0 0 0 3px var(--accent);
   }
 }
 

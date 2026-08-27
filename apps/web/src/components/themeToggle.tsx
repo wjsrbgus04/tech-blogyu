@@ -14,9 +14,26 @@ export function ThemeToggle() {
   }, [])
 
   function toggle() {
-    const next = !document.documentElement.classList.contains('dark')
-    document.documentElement.classList.toggle('dark', next)
+    const root = document.documentElement
+    const next = !root.classList.contains('dark')
+
+    /**
+     * 전환하는 순간에는 모든 transition 을 끈다.
+     * 입력창처럼 배경·테두리에 transition 이 걸린 요소는 테마가 바뀔 때
+     * 옛 색에서 새 색으로 보간되면서 한 번 깜빡인다.
+     * 두 프레임 뒤에 되돌려 hover 같은 평소 동작은 그대로 둔다.
+     */
+    root.classList.add('theme-switching')
+    root.classList.toggle('dark', next)
     setIsDark(next)
+
+    const restore = () => root.classList.remove('theme-switching')
+    // 보통은 두 프레임 뒤에 되돌린다
+    requestAnimationFrame(() => requestAnimationFrame(restore))
+    // 백그라운드 탭에서는 rAF 가 멈춘다. 타이머로도 반드시 해제해야
+    // transition 이 영영 죽은 채로 남지 않는다.
+    setTimeout(restore, 120)
+
     try {
       localStorage.setItem('blogyu-theme', next ? 'dark' : 'light')
     } catch {

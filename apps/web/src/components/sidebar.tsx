@@ -32,7 +32,7 @@ export async function Sidebar({ toc }: { toc?: ReactNode }) {
   const { tags, series } = await loadIndex()
 
   return (
-    <aside className="sticky top-0 flex h-dvh flex-col gap-8 overflow-y-auto py-11 [scrollbar-width:none] max-lg:static max-lg:h-auto max-lg:gap-6 max-lg:border-border max-lg:border-b max-lg:py-7">
+    <aside className="-mx-2 sticky top-0 flex h-dvh flex-col gap-8 overflow-y-auto px-2 py-11 [scrollbar-width:none] max-lg:static max-lg:h-auto max-lg:gap-6 max-lg:border-border max-lg:border-b max-lg:py-7">
       <Link href="/" className="group block">
         <span className="inline-flex items-center gap-2 font-bold text-xl tracking-[-0.03em]">
           <span className="size-[7px] shrink-0 rounded-full bg-accent transition-transform group-hover:scale-[1.45]" />
