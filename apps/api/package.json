@@ -23,7 +23,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "cf-typegen": "wrangler types",
-    "db:seed": "tsx src/db/seed.ts"
+    "db:seed": "tsx src/db/seed.ts",
+    "db:clear": "tsx src/db/clear.ts"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.9.0",

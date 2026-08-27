@@ -19,7 +19,8 @@
     "db:up": "docker compose up -d --wait",
     "db:down": "docker compose down",
     "db:reset": "docker compose down -v && docker compose up -d --wait",
-    "db:seed": "pnpm --filter @blogyu/api db:seed"
+    "db:seed": "pnpm --filter @blogyu/api db:seed",
+    "db:clear": "pnpm --filter @blogyu/api db:clear"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.10",

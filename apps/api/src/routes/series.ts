@@ -1,13 +1,12 @@
-import { and, desc, eq, lte, sql } from 'drizzle-orm'
+import { and, desc, eq, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import type { Db } from '../db/client'
+import { isPublicPost as isPublic } from '../db/filters'
 import { posts, series } from '../db/schema'
 import type { Bindings } from '../lib/env'
 
 type Env = { Bindings: Bindings; Variables: { db: Db } }
-
-const isPublic = and(eq(posts.status, 'published'), lte(posts.publishedAt, sql`now()`))
 
 export const seriesRoute = new Hono<Env>()
 
