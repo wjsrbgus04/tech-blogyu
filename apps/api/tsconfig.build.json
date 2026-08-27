@@ -1,0 +1,15 @@
+{
+  // web 은 이 설정이 뽑은 .d.ts 만 참조한다.
+  // api 소스를 직접 읽게 두면 Workers 전역 타입(Headers·ReadableStream)이
+  // web 의 DOM 타입과 충돌한다.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", ".wrangler"]
+}

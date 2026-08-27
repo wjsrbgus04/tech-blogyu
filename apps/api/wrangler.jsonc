@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "blogyu-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-01",
+  // nodejs_compat: @neondatabase/serverless 가 node:buffer 등을 참조한다
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
+  "r2_buckets": [
+    {
+      // 본문 이미지·커버 이미지 저장소. 대시보드에서 같은 이름으로 먼저 만들어야 한다.
+      "binding": "MEDIA",
+      "bucket_name": "blogyu-media"
+    }
+  ],
+  "vars": {
+    // 비밀이 아닌 값만 여기 둔다. 시크릿은 `wrangler secret put` 으로 넣는다.
+    "ADMIN_GITHUB_LOGINS": "hxxnim",
+    "SITE_URL": "http://localhost:3000",
+    "MEDIA_BASE_URL": "http://localhost:8787/media"
+  }
+}
