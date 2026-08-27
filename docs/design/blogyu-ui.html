@@ -1,0 +1,1614 @@
+<!doctype html>
+<html lang="ko" class="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>blogyu — UI 시안</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* ═══════════════════════════════════════════════════════════
+   토큰 — docs/design/tokens.css 와 동일한 값.
+   저쪽은 Tailwind v4 @theme 용, 이쪽은 시안용 순수 CSS.
+   ═══════════════════════════════════════════════════════════ */
+:root {
+  --n-0:   oklch(0.995 0.002 265);
+  --n-50:  oklch(0.978 0.003 265);
+  --n-100: oklch(0.950 0.004 265);
+  --n-200: oklch(0.906 0.005 265);
+  --n-300: oklch(0.838 0.006 265);
+  --n-400: oklch(0.690 0.008 265);
+  --n-500: oklch(0.572 0.009 265);
+  --n-600: oklch(0.463 0.009 265);
+  --n-700: oklch(0.362 0.008 265);
+  --n-800: oklch(0.262 0.007 265);
+  --n-900: oklch(0.183 0.006 265);
+  --n-950: oklch(0.135 0.006 265);
+
+  --accent-lime: oklch(0.885 0.205 125);
+  --accent:      var(--accent-lime);
+  --accent-ink:  oklch(0.515 0.128 128);
+  --accent-fg:   oklch(0.183 0.006 265);
+  --accent-weak: oklch(0.885 0.205 125 / 0.16);
+
+  --bg:            var(--n-0);
+  --bg-subtle:     var(--n-50);
+  --bg-elevated:   var(--n-0);
+  --bg-sunken:     var(--n-100);
+  --fg:            var(--n-900);
+  --fg-muted:      oklch(0.485 0.009 265);   /* 본문 — 흰 배경 대비 6.3:1 */
+  --fg-faint:      oklch(0.552 0.009 265);   /* 메타·라벨 — 4.6:1 */
+  --border:        oklch(0.183 0.006 265 / 0.10);
+  --border-strong: oklch(0.183 0.006 265 / 0.20);
+
+  --code-bg:     var(--n-50);
+  --code-border: oklch(0.183 0.006 265 / 0.08);
+  --code-kw:     var(--accent-ink);
+  --code-str:    var(--n-600);
+  --code-com:    oklch(0.545 0.008 265);
+
+  --shadow-sm: 0 1px 1px oklch(0.183 0.006 265 / 0.04), 0 2px 6px oklch(0.183 0.006 265 / 0.05);
+  --shadow-md: 0 1px 1px oklch(0.183 0.006 265 / 0.05), 0 8px 24px oklch(0.183 0.006 265 / 0.08);
+
+  --radius-sm: 0.3125rem;
+  --radius-md: 0.625rem;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-instant: 0.1s;
+  --dur-fast: 0.16s;
+  --dur-base: 0.22s;
+
+  --sidebar-w: 15.5rem;
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+               "Apple SD Gothic Neo", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+html.dark {
+  --bg:            var(--n-950);
+  --bg-subtle:     oklch(0.163 0.006 265);
+  --bg-elevated:   oklch(0.196 0.006 265);
+  --bg-sunken:     oklch(0.118 0.006 265);
+  --fg:            var(--n-100);
+  --fg-muted:      var(--n-400);
+  --fg-faint:      var(--n-500);
+  --border:        oklch(0.99 0 0 / 0.10);
+  --border-strong: oklch(0.99 0 0 / 0.19);
+
+  --accent-ink:  var(--accent-lime);
+  --accent-weak: oklch(0.885 0.205 125 / 0.14);
+
+  --code-bg:     oklch(0.163 0.006 265);
+  --code-border: oklch(0.99 0 0 / 0.07);
+  --code-kw:     var(--accent-lime);
+  --code-str:    var(--n-300);
+  --code-com:    oklch(0.625 0.009 265);
+
+  --shadow-sm: 0 1px 1px oklch(0 0 0 / 0.30), 0 2px 6px oklch(0 0 0 / 0.35);
+  --shadow-md: 0 1px 1px oklch(0 0 0 / 0.35), 0 8px 24px oklch(0 0 0 / 0.45);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   베이스
+   ═══════════════════════════════════════════════════════════ */
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;          /* 17px — 한글 본문 */
+  font-weight: 400;
+  line-height: 1.75;
+  font-feature-settings: "ss01";
+  -webkit-font-smoothing: antialiased;
+  overflow-wrap: break-word;
+  /* 테마 전환에는 transition을 걸지 않는다. 다크↔라이트를 보간하면
+     중간에 탁한 회색을 거쳐 오히려 지저분하다. 즉시 바뀌는 편이 낫다. */
+}
+
+/* 필름 그레인 — 고정 오버레이. 눈에 띄면 실패한 것 */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+html.dark body::after { opacity: 0.065; mix-blend-mode: normal; }
+
+/* 한글은 자간을 음수로 조이면 글리프가 금방 뭉갠다. -0.01em이 하한. */
+h1, h2, h3, h4 { margin: 0; font-weight: 640; letter-spacing: -0.006em; }
+p { margin: 0; }
+a { color: inherit; text-decoration: none; }
+:lang(ko) h1, :lang(ko) h2, :lang(ko) h3 { word-break: keep-all; text-wrap: balance; }
+:lang(ko) p, :lang(ko) li { word-break: keep-all; text-wrap: pretty; }
+
+:is(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent-ink);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* 섹션 라벨 — 대문자 모노 라벨은 쓰지 않는다. 한국어 화면 위에
+   영문 대문자를 얹으면 읽는 리듬이 끊기고 관리 콘솔처럼 보인다. */
+.label {
+  font-size: 0.75rem;
+  font-weight: 560;
+  color: var(--fg-faint);
+  line-height: 1.5;
+}
+.tabular { font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--font-mono); }
+
+/* ═══════════════════════════════════════════════════════════
+   시안 컨트롤 (실제 제품에는 없음)
+   ═══════════════════════════════════════════════════════════ */
+.deck {
+  position: fixed;
+  z-index: 50;
+  left: 50%;
+  bottom: 1.25rem;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  box-shadow: var(--shadow-md);
+  max-width: calc(100vw - 2rem);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.deck::-webkit-scrollbar { display: none; }
+.deck button {
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 520;
+  white-space: nowrap;
+  padding: 0.4rem 0.8rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out),
+              background-color var(--dur-fast) var(--ease-out);
+}
+.deck button:hover { color: var(--fg); }
+.deck button[aria-current="true"] { background: var(--fg); color: var(--bg); }
+.deck .sep { width: 1px; background: var(--border); margin: 6px 4px; flex: none; }
+
+/* ═══════════════════════════════════════════════════════════
+   레이아웃 — B 사이드바 인덱스
+   ═══════════════════════════════════════════════════════════ */
+.shell {
+  display: none;
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: 0 2rem;
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+  column-gap: 4.5rem;
+  align-items: start;
+}
+.shell.is-on { display: grid; }
+
+.side {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  padding: 2.75rem 0 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.side::-webkit-scrollbar { display: none; }
+
+.main { padding: 2.75rem 0 8rem; min-width: 0; }
+
+/* ── 사이드바 브랜드 ── */
+.brand { display: block; }
+.brand__name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.brand__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--accent);
+  flex: none;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.brand:hover .brand__dot { transform: scale(1.45); }
+.brand__desc {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--fg-muted);
+}
+
+/* ── 사이드바 검색 ── */
+.side-search { position: relative; }
+.side-search input {
+  font: inherit;
+  font-size: 0.8125rem;
+  width: 100%;
+  padding: 0.5rem 0.7rem 0.5rem 1.9rem;
+  background: var(--bg-subtle);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--fg);
+  transition: border-color var(--dur-fast) var(--ease-out),
+              background-color var(--dur-fast) var(--ease-out);
+}
+.side-search input::placeholder { color: var(--fg-faint); }
+.side-search input:hover { border-color: var(--border); }
+.side-search input:focus { background: var(--bg); border-color: var(--border-strong); outline-offset: 1px; }
+.side-search svg {
+  position: absolute;
+  left: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--fg-faint);
+  pointer-events: none;
+}
+.side-search kbd {
+  position: absolute;
+  right: 0.45rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--fg-faint);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0.05rem 0.3rem;
+  pointer-events: none;
+}
+
+/* ── 사이드바 블록 ── */
+.side-block > .label { display: block; margin-bottom: 0.65rem; }
+.side-list { list-style: none; margin: 0; padding: 0; font-size: 0.8125rem; }
+.side-list li + li { margin-top: 0.15rem; }
+.side-list a {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: baseline;
+  padding: 0.22rem 0.45rem 0.22rem 0.5rem;
+  margin-left: -0.5rem;
+  border-radius: var(--radius-sm);
+  color: var(--fg-muted);
+  transition: color var(--dur-fast) var(--ease-out),
+              background-color var(--dur-fast) var(--ease-out);
+}
+.side-list a:hover { color: var(--fg); background: var(--bg-subtle); }
+.side-list a[aria-current="page"] { color: var(--fg); font-weight: 560; }
+.side-list a[aria-current="page"]::before {
+  content: "";
+  width: 3px;
+  height: 0.85em;
+  background: var(--accent);
+  border-radius: 2px;
+  margin-left: -0.85rem;
+  margin-right: 0.45rem;
+  flex: none;
+  align-self: center;
+}
+.side-list .n { color: var(--fg-faint); font-variant-numeric: tabular-nums; font-size: 0.75rem; }
+.side-more { font-size: 0.75rem; color: var(--fg-faint); padding-left: 0.5rem; margin-left: -0.5rem; }
+.side-more:hover { color: var(--accent-ink); }
+
+/* ── 사이드바 푸터 ── */
+.side-foot {
+  margin-top: auto;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  font-size: 0.75rem;
+  color: var(--fg-faint);
+}
+.side-foot a:hover { color: var(--fg); }
+.theme-btn {
+  font: inherit;
+  margin-left: auto;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+.theme-btn:hover { color: var(--fg); border-color: var(--border-strong); }
+html.dark .theme-btn .i-sun { display: block; }
+html.dark .theme-btn .i-moon { display: none; }
+.theme-btn .i-sun { display: none; }
+.theme-btn .i-moon { display: block; }
+
+/* ── 목차 (글 상세일 때 사이드바 최상단) ── */
+#tocBlock { display: none; }
+body[data-screen="post"] #tocBlock { display: block; }
+
+.toc { position: relative; padding-left: 0.9rem; }
+.toc__rail {
+  position: absolute;
+  left: 0;
+  top: 0.25rem;
+  bottom: 0.25rem;
+  width: 1px;
+  background: var(--border-strong);
+}
+/* 시그니처 ① — 레일 위를 움직이는 액센트 마커 */
+.toc__marker {
+  position: absolute;
+  left: -1px;
+  top: 0;
+  width: 3px;
+  height: 1.35rem;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.toc ol { list-style: none; margin: 0; padding: 0; font-size: 0.8125rem; }
+.toc ol ol { padding-left: 0.75rem; font-size: 0.75rem; }
+.toc li { line-height: 1.35rem; }
+.toc a {
+  display: block;
+  color: var(--fg-faint);
+  padding: 0 0.25rem;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.toc a:hover { color: var(--fg-muted); }
+.toc a[aria-current="true"] { color: var(--fg); font-weight: 560; }
+
+/* ═══════════════════════════════════════════════════════════
+   메인 — 목록
+   ═══════════════════════════════════════════════════════════ */
+.main-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1.1rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0.25rem;
+}
+.main-head h1 { font-size: 0.75rem; }
+.rss {
+  font-size: 0.75rem;
+  color: var(--fg-faint);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.rss:hover { color: var(--accent-ink); }
+
+.feed { list-style: none; margin: 0; padding: 0; }
+.feed > li { border-bottom: 1px solid var(--border); }
+
+.entry { position: relative; display: block; padding: 1.9rem 0; }
+/* 시그니처 ② — hover 시 왼쪽에서 밀려나오는 인덱스 */
+.entry__idx {
+  position: absolute;
+  left: -2.75rem;
+  top: 1.95rem;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-ink);
+  opacity: 0;
+  transform: translateX(0.4rem);
+  transition: opacity var(--dur-base) var(--ease-out),
+              transform var(--dur-base) var(--ease-out);
+}
+.entry:hover .entry__idx,
+.entry:focus-within .entry__idx { opacity: 1; transform: none; }
+
+.entry__meta {
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-faint);
+  margin-bottom: 0.5rem;
+}
+.entry__title {
+  font-size: 1.25rem;
+  line-height: 1.5;
+  margin-bottom: 0.4rem;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.entry:hover .entry__title { color: var(--accent-ink); }
+.entry__sum {
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: var(--fg-muted);
+  max-width: 62ch;
+  margin-bottom: 0.85rem;
+}
+.entry__sum--clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.chips { list-style: none; display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0; padding: 0; }
+.chips a {
+  font-size: 0.75rem;
+  color: var(--fg-faint);
+  padding: 0.12rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+.chips a:hover { color: var(--fg); border-color: var(--border-strong); }
+.chips a[aria-current="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+
+.pager { display: flex; gap: 0.35rem; margin-top: 2.5rem; }
+.pager a, .pager span {
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  min-width: 1.9rem;
+  padding: 0.35rem 0.55rem;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--fg-muted);
+  transition: border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.pager a:hover { color: var(--fg); border-color: var(--border-strong); }
+.pager [aria-current="page"] { background: var(--fg); border-color: var(--fg); color: var(--bg); }
+
+/* ═══════════════════════════════════════════════════════════
+   글 상세
+   ═══════════════════════════════════════════════════════════ */
+.post { max-width: 44rem; }
+.post__head { padding-bottom: 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2.75rem; }
+.post__meta {
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-faint);
+  margin-bottom: 1.1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.post__meta .dot { color: var(--fg-faint); opacity: 0.5; }
+.post__title {
+  font-size: clamp(2rem, 4.2vw, 3.125rem);
+  line-height: 1.26;
+  letter-spacing: -0.008em;
+  font-weight: 700;
+  margin-bottom: 1.1rem;
+}
+.post__lede {
+  font-size: 1.125rem;
+  line-height: 1.72;
+  color: var(--fg-muted);
+  margin-bottom: 1.5rem;
+  max-width: 40rem;
+}
+
+.prose > * + * { margin-top: 1.4rem; }
+.prose h2 {
+  font-size: 1.375rem;
+  margin-top: 3.25rem;
+  padding-top: 0.5rem;
+  scroll-margin-top: 2rem;
+}
+.prose h3 { font-size: 1.0625rem; margin-top: 2.25rem; scroll-margin-top: 2rem; }
+.prose p { color: var(--fg-muted); }
+.prose strong { color: var(--fg); font-weight: 620; }
+.prose ul { margin: 0; padding-left: 1.15rem; color: var(--fg-muted); }
+.prose li + li { margin-top: 0.4rem; }
+.prose li::marker { color: var(--fg-faint); }
+
+.prose a:not(.chips a) {
+  color: var(--fg);
+  border-bottom: 1px solid var(--accent);
+  padding-bottom: 1px;
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+.prose a:not(.chips a):hover { background: var(--accent-weak); }
+
+.prose blockquote {
+  margin: 2rem 0;
+  padding-left: 1.25rem;
+  border-left: 2px solid var(--accent);
+  color: var(--fg);
+  font-size: 1.0625rem;
+}
+.prose blockquote p { color: var(--fg); }
+
+.prose pre {
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  border-radius: var(--radius-md);
+  padding: 1.05rem 1.15rem;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  margin: 1.6rem 0;
+}
+.prose :not(pre) > code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.08em 0.34em;
+  color: var(--fg);
+}
+.tok-kw  { color: var(--code-kw); }
+.tok-str { color: var(--code-str); }
+.tok-com { color: var(--code-com); }
+.tok-fn  { color: var(--fg); }
+
+.prose table { border-collapse: collapse; width: 100%; font-size: 0.875rem; margin: 1.6rem 0; }
+.prose th, .prose td { text-align: left; padding: 0.6rem 0.7rem; border-bottom: 1px solid var(--border); }
+.prose th { font-size: 0.8125rem; color: var(--fg-faint); font-weight: 560; }
+.prose td { color: var(--fg-muted); }
+.prose td.tabular { color: var(--fg); }
+
+.prose figure { margin: 2rem 0; }
+.figph {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-subtle);
+  display: grid;
+  place-items: center;
+  min-height: 12rem;
+  color: var(--fg-faint);
+  font-size: 0.75rem;
+}
+.prose figcaption { font-size: 0.75rem; color: var(--fg-faint); text-align: center; margin-top: 0.7rem; }
+
+/* 시리즈 */
+.series {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1.1rem 1.25rem;
+  margin: 2.5rem 0;
+  background: var(--bg-subtle);
+}
+.series > .label { display: block; margin-bottom: 0.75rem; }
+.series ol { list-style: none; margin: 0; padding: 0; counter-reset: s; font-size: 0.875rem; }
+.series li {
+  counter-increment: s;
+  display: flex;
+  gap: 0.7rem;
+  padding: 0.28rem 0;
+  color: var(--fg-muted);
+}
+.series li::before {
+  content: counter(s) ".";
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-faint);
+  padding-top: 0.22rem;
+  flex: none;
+}
+.series li[aria-current="true"] { color: var(--fg); font-weight: 560; }
+.series li[aria-current="true"]::before { color: var(--accent-ink); }
+.series a:hover { color: var(--fg); }
+
+/* 반응 바 */
+.react {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+  padding: 1.25rem 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin-top: 3rem;
+  font-size: 0.8125rem;
+  color: var(--fg-faint);
+}
+.btn-ghost {
+  font: inherit;
+  font-size: 0.8125rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out);
+}
+.btn-ghost:hover { color: var(--fg); border-color: var(--border-strong); }
+.btn-ghost:active { transform: scale(0.97); }
+.btn-ghost[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-fg);
+  font-weight: 560;
+}
+.react__spacer { margin-left: auto; }
+
+/* 이전 / 다음 */
+.adj { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 2rem; }
+.adj a {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.1rem;
+  transition: border-color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+.adj a:hover { border-color: var(--border-strong); background: var(--bg-subtle); }
+.adj .label { display: block; margin-bottom: 0.45rem; }
+.adj .t { font-size: 0.875rem; line-height: 1.55; font-weight: 560; }
+.adj .next { text-align: right; }
+
+/* 댓글 */
+.comments { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); }
+.comments__head { display: flex; align-items: baseline; gap: 0.6rem; margin-bottom: 1.25rem; }
+.comments__head h2 { font-size: 0.9375rem; }
+.comments__head .n { font-size: 0.875rem; font-variant-numeric: tabular-nums; color: var(--fg-faint); }
+.giscus {
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 2.25rem 1.25rem;
+  text-align: center;
+  color: var(--fg-faint);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+}
+.giscus code { font-family: var(--font-mono); font-size: 0.75rem; color: var(--fg-muted); }
+
+/* ═══════════════════════════════════════════════════════════
+   태그 · 검색
+   ═══════════════════════════════════════════════════════════ */
+.tag-hero { padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 0.5rem; }
+.tag-hero h1 {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 620;
+  letter-spacing: -0.022em;   /* 라틴 전용 — 한글 하한과 무관 */
+  margin-bottom: 0.5rem;
+}
+.tag-hero h1 .hash { color: var(--accent); }
+.tag-hero p { font-size: 0.875rem; color: var(--fg-muted); max-width: 46ch; }
+
+.searchbar { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; }
+.searchbar input {
+  font: inherit;
+  font-size: 1rem;
+  flex: 1;
+  min-width: 0;
+  padding: 0.7rem 0.95rem;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--fg);
+}
+.searchbar input:focus { background: var(--bg); border-color: var(--border-strong); }
+.hit { background: var(--accent-weak); color: var(--fg); border-radius: 3px; padding: 0 0.15em; }
+.result-count { font-size: 0.8125rem; color: var(--fg-faint); margin-bottom: 1.5rem; }
+.result-count b { color: var(--fg); font-weight: 560; }
+
+.cloud { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.cloud a {
+  font-size: 0.875rem;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--fg-muted);
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: baseline;
+  transition: color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.cloud a:hover { color: var(--fg); border-color: var(--border-strong); }
+.cloud a[aria-current="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+.cloud .n { font-size: 0.75rem; font-variant-numeric: tabular-nums; opacity: 0.55; }
+
+/* ═══════════════════════════════════════════════════════════
+   어드민
+   ═══════════════════════════════════════════════════════════ */
+.admin { display: none; }
+.admin.is-on { display: block; }
+
+.abar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: color-mix(in oklab, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+.abar__in {
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: 0.85rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.abar__brand { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; font-weight: 620; }
+.abar__brand .label { color: var(--fg-faint); }
+.abar__nav { display: flex; gap: 0.15rem; margin-left: 1rem; }
+.abar__nav a {
+  font-size: 0.8125rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--radius-sm);
+  color: var(--fg-muted);
+  transition: color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+.abar__nav a:hover { color: var(--fg); background: var(--bg-subtle); }
+.abar__nav a[aria-current="page"] { color: var(--fg); background: var(--bg-subtle); font-weight: 560; }
+.abar__right { margin-left: auto; display: flex; align-items: center; gap: 0.75rem; }
+.avatar {
+  width: 1.6rem; height: 1.6rem; border-radius: 999px;
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  display: grid; place-items: center;
+  font-size: 0.6875rem; font-weight: 560; color: var(--fg-muted);
+}
+
+.awrap { max-width: 76rem; margin: 0 auto; padding: 2.25rem 2rem 6rem; }
+.ahead { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.75rem; }
+.ahead h1 { font-size: 1.5rem; letter-spacing: -0.006em; }
+.ahead p { font-size: 0.8125rem; color: var(--fg-muted); margin-top: 0.3rem; }
+
+.btn {
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 520;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--fg);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out),
+              background-color var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out);
+}
+.btn:hover { border-color: var(--border-strong); background: var(--bg-subtle); }
+.btn:active { transform: scale(0.98); }
+.btn--primary { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); font-weight: 600; }
+.btn--primary:hover { background: var(--accent); border-color: var(--accent); filter: brightness(1.06); }
+.btn--quiet { border-color: transparent; color: var(--fg-muted); }
+.btn--quiet:hover { color: var(--fg); }
+
+.seg { display: inline-flex; gap: 2px; padding: 3px; background: var(--bg-subtle); border-radius: var(--radius-sm); }
+.seg button {
+  font: inherit; font-size: 0.75rem; font-weight: 520;
+  padding: 0.28rem 0.7rem; border: 0; border-radius: 4px;
+  background: transparent; color: var(--fg-muted); cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.seg button:hover { color: var(--fg); }
+.seg button[aria-selected="true"] { background: var(--bg); color: var(--fg); box-shadow: var(--shadow-sm); }
+.seg .n { font-size: 0.6875rem; font-variant-numeric: tabular-nums; opacity: 0.6; margin-left: 0.3rem; }
+
+.atable { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.atable th {
+  font-size: 0.75rem; font-weight: 560; color: var(--fg-faint);
+  text-align: left; padding: 0 0.7rem 0.6rem; border-bottom: 1px solid var(--border);
+}
+.atable td { padding: 0.85rem 0.7rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.atable tr { transition: background-color var(--dur-fast) var(--ease-out); }
+.atable tbody tr:hover { background: var(--bg-subtle); }
+.atable .t { font-weight: 560; display: block; margin-bottom: 0.15rem; }
+.atable .t:hover { color: var(--accent-ink); }
+.atable .slug { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--fg-faint); }
+.atable .dt { font-size: 0.8125rem; color: var(--fg-faint); white-space: nowrap; }
+.atable .num { text-align: right; font-variant-numeric: tabular-nums; font-size: 0.875rem; color: var(--fg-muted); white-space: nowrap; }
+.atable .acts { text-align: right; white-space: nowrap; }
+.atable .acts a { font-size: 0.75rem; color: var(--fg-faint); padding: 0 0.35rem; }
+.atable .acts a:hover { color: var(--fg); }
+
+.pill {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  font-size: 0.75rem;
+  padding: 0.14rem 0.55rem; border-radius: 999px;
+  border: 1px solid var(--border); color: var(--fg-muted);
+  white-space: nowrap;
+}
+.pill::before { content: ""; width: 5px; height: 5px; border-radius: 999px; background: var(--fg-faint); }
+.pill--live { border-color: var(--accent-weak); color: var(--accent-ink); }
+.pill--live::before { background: var(--accent); }
+
+/* ── 에디터 ── */
+.ed-top {
+  display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+  padding-bottom: 1.1rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem;
+}
+.ed-top .back { font-size: 0.8125rem; color: var(--fg-muted); display: inline-flex; align-items: center; gap: 0.35rem; }
+.ed-top .back:hover { color: var(--fg); }
+.saved { font-size: 0.75rem; color: var(--fg-faint); display: inline-flex; align-items: center; gap: 0.4rem; }
+.saved::before { content: ""; width: 5px; height: 5px; border-radius: 999px; background: var(--accent); }
+
+.ed-title {
+  font: inherit;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.008em;
+  line-height: 1.4;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--fg);
+  padding: 0 0 1rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+.ed-title::placeholder { color: var(--fg-faint); }
+.ed-title:focus { outline: none; border-bottom-color: var(--accent); }
+
+.ed-grid { display: grid; grid-template-columns: minmax(0, 1fr) 17.5rem; gap: 2rem; align-items: start; }
+
+.ed-tools {
+  display: flex; flex-wrap: wrap; gap: 0.15rem;
+  padding: 0.35rem;
+  border: 1px solid var(--border);
+  border-bottom: 0;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  background: var(--bg-subtle);
+}
+.ed-tools button {
+  font: inherit; font-size: 0.8125rem;
+  padding: 0.25rem 0.55rem; border: 0; border-radius: 4px;
+  background: transparent; color: var(--fg-muted); cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.ed-tools button:hover { background: var(--bg); color: var(--fg); }
+.ed-tools .div { width: 1px; background: var(--border); margin: 0.25rem 0.35rem; }
+
+.ed-body {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.85;
+  width: 100%;
+  min-height: 26rem;
+  padding: 1.15rem;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: var(--bg);
+  color: var(--fg-muted);
+  resize: vertical;
+}
+.ed-body:focus { outline: none; border-color: var(--border-strong); }
+.ed-drop {
+  border: 1px dashed var(--border);
+  border-top: 0;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  padding: 0.9rem;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--fg-faint);
+}
+
+.panel { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+.panel section { padding: 1rem 1.1rem; border-bottom: 1px solid var(--border); }
+.panel section:last-child { border-bottom: 0; }
+.panel .label { display: block; margin-bottom: 0.7rem; }
+.field + .field { margin-top: 0.8rem; }
+.field label { display: block; font-size: 0.75rem; color: var(--fg-muted); margin-bottom: 0.3rem; }
+.field input, .field select, .field textarea {
+  font: inherit; font-size: 0.8125rem;
+  width: 100%; padding: 0.42rem 0.6rem;
+  background: var(--bg-subtle);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--fg);
+  transition: border-color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+.field input:focus, .field select:focus, .field textarea:focus { background: var(--bg); border-color: var(--border-strong); outline-offset: 1px; }
+.field textarea { min-height: 5.5rem; resize: vertical; line-height: 1.6; }
+.field .hint { font-family: var(--font-mono); font-size: 0.625rem; color: var(--fg-faint); margin-top: 0.3rem; }
+.radios { display: flex; flex-direction: column; gap: 0.45rem; font-size: 0.8125rem; color: var(--fg-muted); }
+.radios label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+.radios input { accent-color: var(--accent-ink); }
+.coverph {
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  min-height: 5.5rem;
+  display: grid; place-items: center;
+  color: var(--fg-faint);
+  font-size: 0.75rem;
+}
+
+/* ── 로그인 ── */
+.login { min-height: 100dvh; display: grid; place-items: center; padding: 2rem; }
+.login__card { width: 100%; max-width: 22rem; text-align: center; }
+.login__card .brand__name { font-size: 1.5rem; justify-content: center; }
+.login__card h1 { font-size: 0.9375rem; margin: 2rem 0 0.4rem; }
+.login__card p { font-size: 0.8125rem; color: var(--fg-muted); margin-bottom: 1.5rem; }
+.btn-gh {
+  font: inherit; font-size: 0.875rem; font-weight: 560;
+  width: 100%;
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.55rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--fg); color: var(--bg);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out), opacity var(--dur-fast) var(--ease-out);
+}
+.btn-gh:hover { opacity: 0.88; }
+.btn-gh:active { transform: scale(0.985); }
+.login__note { font-size: 0.75rem; color: var(--fg-faint); margin-top: 1.1rem; line-height: 1.65; }
+
+/* 모션은 hover·focus·목차 마커의 마이크로 인터랙션에만 둔다.
+   목록 진입 stagger는 의도적으로 넣지 않았다 — 백그라운드 탭에서
+   애니메이션이 스로틀되면 opacity 0에 멈춰 본문이 사라진다. */
+
+/* ═══════════════════════════════════════════════════════════
+   반응형
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 62rem) {
+  .shell.is-on { display: block; padding: 0 1.5rem; }
+  .side {
+    position: static;
+    height: auto;
+    padding: 1.75rem 0 1.5rem;
+    gap: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .side-foot { margin-top: 0; }
+  .main { padding-top: 2rem; }
+  .entry__idx { display: none; }
+  .ed-grid { display: block; }
+  .panel { margin-top: 1.5rem; }
+  .abar__in, .awrap { padding-left: 1.5rem; padding-right: 1.5rem; }
+}
+
+@media (max-width: 40rem) {
+  body { font-size: 1rem; }
+  .shell.is-on { padding: 0 1.15rem; }
+  .abar__in, .awrap { padding-left: 1.15rem; padding-right: 1.15rem; }
+  .adj { grid-template-columns: minmax(0, 1fr); }
+  .adj .next { text-align: left; }
+  .post__lede { font-size: 1.0625rem; }
+  .atable .hide-sm { display: none; }
+  .abar__nav { margin-left: 0; }
+  .deck { bottom: 0.6rem; }
+}
+</style>
+</head>
+<body data-screen="home">
+
+<!-- ═══ 독자 셸 ═══════════════════════════════════════════ -->
+<div class="shell is-on" id="readerShell">
+
+  <aside class="side">
+    <a class="brand" href="#" data-go="home">
+      <span class="brand__name"><span class="brand__dot"></span>blogyu</span>
+      <span class="brand__desc">엣지 런타임과 타입 안전한 API에 대해 씁니다. 대체로 실패한 이야기.</span>
+    </a>
+
+    <!-- 시그니처 ① 목차 — 글 상세에서만 -->
+    <div class="side-block" id="tocBlock">
+      <span class="label">목차</span>
+      <nav class="toc" aria-label="목차">
+        <div class="toc__rail" aria-hidden="true"><span class="toc__marker" id="tocMarker"></span></div>
+        <ol>
+          <li><a href="#h1" data-toc="h1" aria-current="true">엣지 런타임의 커넥션 문제</a></li>
+          <li><a href="#h2" data-toc="h2">HTTP 드라이버로 전환</a>
+            <ol>
+              <li><a href="#h2a" data-toc="h2a">Drizzle 설정</a></li>
+              <li><a href="#h2b" data-toc="h2b">지연 시간 측정</a></li>
+            </ol>
+          </li>
+          <li><a href="#h3" data-toc="h3">남은 제약</a></li>
+        </ol>
+      </nav>
+    </div>
+
+    <form class="side-search" role="search" onsubmit="return false">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <circle cx="7" cy="7" r="4.6" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      <input type="search" placeholder="검색" aria-label="블로그 검색">
+      <kbd>/</kbd>
+    </form>
+
+    <div class="side-block">
+      <span class="label">태그</span>
+      <ul class="side-list">
+        <li><a href="#" data-go="tag"><span>cloudflare</span><span class="n">6</span></a></li>
+        <li><a href="#" data-go="tag"><span>nextjs</span><span class="n">5</span></a></li>
+        <li><a href="#" data-go="tag"><span>typescript</span><span class="n">4</span></a></li>
+        <li><a href="#" data-go="tag"><span>postgres</span><span class="n">3</span></a></li>
+        <li><a href="#" data-go="tag"><span>monorepo</span><span class="n">2</span></a></li>
+      </ul>
+      <a class="side-more" href="#" data-go="tag">전체 태그 →</a>
+    </div>
+
+    <div class="side-block">
+      <span class="label">시리즈</span>
+      <ul class="side-list">
+        <li><a href="#"><span>무료 티어로 블로그 만들기</span><span class="n">3</span></a></li>
+        <li><a href="#"><span>타입 안전 API 설계</span><span class="n">2</span></a></li>
+      </ul>
+    </div>
+
+    <div class="side-foot">
+      <a href="#">RSS</a>
+      <a href="#">GitHub</a>
+      <button class="theme-btn" id="themeBtn" aria-label="테마 전환">
+        <svg class="i-sun" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <circle cx="8" cy="8" r="3.1" stroke="currentColor" stroke-width="1.3"/>
+          <path d="M8 1v1.6M8 13.4V15M15 8h-1.6M2.6 8H1M12.9 3.1l-1.1 1.1M4.2 11.8l-1.1 1.1M12.9 12.9l-1.1-1.1M4.2 4.2L3.1 3.1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+        <svg class="i-moon" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M13.5 9.6A5.8 5.8 0 016.4 2.5a5.9 5.9 0 107.1 7.1z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- ── 홈 ─────────────────────────────────────────── -->
+    <section class="view" data-view="home">
+      <div class="main-head">
+        <h1 class="label">최근 글</h1>
+        <a class="rss" href="#">RSS 구독</a>
+      </div>
+      <ul class="feed" id="feedHome"></ul>
+      <nav class="pager" aria-label="페이지">
+        <span aria-current="page">1</span>
+        <a href="#">2</a>
+        <a href="#">3</a>
+        <a href="#">→</a>
+      </nav>
+    </section>
+
+    <!-- ── 글 상세 ────────────────────────────────────── -->
+    <section class="view" data-view="post" hidden>
+      <article class="post">
+        <header class="post__head">
+          <p class="post__meta">
+            <span>2026년 8월 20일</span><span class="dot">·</span>
+            <span>8분</span><span class="dot">·</span>
+            <span class="tabular">조회 1,240</span>
+          </p>
+          <h1 class="post__title">Cloudflare Workers에서 Postgres 연결 최적화하기</h1>
+          <p class="post__lede">엣지 런타임에는 TCP 커넥션 풀이 없습니다. HTTP 드라이버로 갈아타면서 측정한 지연 시간과, 그 과정에서 알게 된 제약을 정리했습니다.</p>
+          <ul class="chips">
+            <li><a href="#" data-go="tag">cloudflare</a></li>
+            <li><a href="#" data-go="tag">postgres</a></li>
+            <li><a href="#" data-go="tag">edge</a></li>
+          </ul>
+        </header>
+
+        <div class="prose">
+          <h2 id="h1">엣지 런타임의 커넥션 문제</h2>
+          <p>Workers는 요청마다 격리된 컨텍스트에서 실행됩니다. 프로세스가 살아 있는 동안 커넥션을 재사용하는 전통적인 풀링 전략이 통하지 않는다는 뜻입니다. 매 요청 TCP 핸드셰이크를 새로 하면 왕복 지연이 그대로 응답 시간에 얹힙니다.</p>
+          <blockquote>
+            <p>엣지에서는 “연결을 오래 붙잡는” 최적화가 아니라 “연결을 아예 만들지 않는” 최적화가 필요합니다.</p>
+          </blockquote>
+          <p>처음에는 <code>pg</code> 드라이버를 그대로 올려봤습니다. 로컬에서는 멀쩡했지만 배포하자마자 <code>Too many connections</code>가 쏟아졌습니다. 격리 컨텍스트마다 새 커넥션을 열고 있었으니 당연한 결과입니다.</p>
+
+          <h2 id="h2">HTTP 드라이버로 전환</h2>
+          <p>Neon은 Postgres 와이어 프로토콜을 HTTP로 감싼 서버리스 드라이버를 제공합니다. 커넥션이라는 개념 자체가 사라져 Workers와 궁합이 맞습니다.</p>
+
+          <h3 id="h2a">Drizzle 설정</h3>
+          <pre><code><span class="tok-kw">import</span> { drizzle } <span class="tok-kw">from</span> <span class="tok-str">'drizzle-orm/neon-http'</span>
+<span class="tok-kw">import</span> { neon } <span class="tok-kw">from</span> <span class="tok-str">'@neondatabase/serverless'</span>
+
+<span class="tok-com">// 요청마다 새로 만들어도 비용이 없다 — 연결이 아니라 fetch다</span>
+<span class="tok-kw">export const</span> <span class="tok-fn">createDb</span> = (url: <span class="tok-kw">string</span>) =&gt;
+  <span class="tok-fn">drizzle</span>(<span class="tok-fn">neon</span>(url), { schema })</code></pre>
+
+          <h3 id="h2b">지연 시간 측정</h3>
+          <p>도쿄 리전에서 1,000회씩 측정했습니다. 차이는 예상보다 컸습니다.</p>
+          <table>
+            <thead>
+              <tr><th>방식</th><th>p50</th><th>p95</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>TCP 직접 연결</td><td class="tabular">182ms</td><td class="tabular">410ms</td></tr>
+              <tr><td>HTTP 드라이버</td><td class="tabular">41ms</td><td class="tabular">96ms</td></tr>
+            </tbody>
+          </table>
+
+          <figure>
+            <div class="figph">Image — 지연 시간 분포</div>
+            <figcaption>p50은 4배, p95는 4.3배 차이가 났습니다</figcaption>
+          </figure>
+
+          <h2 id="h3">남은 제약</h2>
+          <p>공짜는 아닙니다. HTTP 드라이버에는 두 가지 제약이 따라옵니다.</p>
+          <ul>
+            <li>트랜잭션은 <strong>단일 HTTP 요청 안에서만</strong> 묶을 수 있습니다.</li>
+            <li>커서 기반 스트리밍은 지원되지 않습니다.</li>
+          </ul>
+          <p>블로그처럼 읽기가 대부분인 워크로드에서는 둘 다 실질적인 문제가 되지 않았습니다. 쓰기가 많고 긴 트랜잭션이 필요한 서비스라면 <a href="#">Hyperdrive</a> 쪽을 먼저 검토하는 편이 낫습니다.</p>
+
+          <div class="series">
+            <span class="label">시리즈 · 무료 티어로 블로그 만들기</span>
+            <ol>
+              <li><a href="#">스택 고르기</a></li>
+              <li aria-current="true">Workers에서 Postgres 연결 최적화하기</li>
+              <li><a href="#">배포 파이프라인 붙이기</a></li>
+            </ol>
+          </div>
+
+          <div class="react">
+            <button class="btn-ghost" id="likeBtn" aria-pressed="false">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M8 13.4S1.8 9.9 1.8 5.9A3.1 3.1 0 018 4.3a3.1 3.1 0 016.2 1.6c0 4-6.2 7.5-6.2 7.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+              </svg>
+              <span class="tabular" id="likeN">37</span>
+            </button>
+            <button class="btn-ghost">링크 복사</button>
+            <span class="react__spacer"></span>
+            <span class="tabular">조회 1,240</span>
+          </div>
+
+          <nav class="adj" aria-label="이전 다음 글">
+            <a href="#">
+              <span class="label">이전 글</span>
+              <span class="t">Hono RPC로 프론트엔드까지 타입 전달하기</span>
+            </a>
+            <a href="#" class="next">
+              <span class="label">다음 글</span>
+              <span class="t">Next.js 16 Cache Components 실전 적용기</span>
+            </a>
+          </nav>
+
+          <section class="comments" aria-label="댓글">
+            <div class="comments__head">
+              <h2>댓글</h2>
+              <span class="n">4</span>
+            </div>
+            <div class="giscus">
+              Giscus 임베드 영역<br>
+              <code>github.com/hxxnim/blogyu · Discussions</code><br>
+              테마는 blogyu 토큰에 맞춘 커스텀 CSS를 넘깁니다
+            </div>
+          </section>
+        </div>
+      </article>
+    </section>
+
+    <!-- ── 태그 아카이브 ──────────────────────────────── -->
+    <section class="view" data-view="tag" hidden>
+      <header class="tag-hero">
+        <h1><span class="hash">#</span>cloudflare</h1>
+        <p>엣지 런타임, Workers, R2, D1에 대해 쓴 글 6편.</p>
+      </header>
+      <ul class="feed" id="feedTag"></ul>
+
+      <h2 class="label" style="display:block;margin:3.5rem 0 1rem">전체 태그</h2>
+      <div class="cloud">
+        <a href="#" aria-current="true">cloudflare <span class="n">6</span></a>
+        <a href="#">nextjs <span class="n">5</span></a>
+        <a href="#">typescript <span class="n">4</span></a>
+        <a href="#">postgres <span class="n">3</span></a>
+        <a href="#">monorepo <span class="n">2</span></a>
+        <a href="#">drizzle <span class="n">2</span></a>
+        <a href="#">hono <span class="n">2</span></a>
+        <a href="#">edge <span class="n">2</span></a>
+        <a href="#">ci <span class="n">1</span></a>
+        <a href="#">vercel <span class="n">1</span></a>
+      </div>
+    </section>
+
+    <!-- ── 검색 ───────────────────────────────────────── -->
+    <section class="view" data-view="search" hidden>
+      <h1 class="label" style="display:block;margin-bottom:1rem">검색</h1>
+      <form class="searchbar" role="search" onsubmit="return false">
+        <input type="search" value="postgres" aria-label="검색어">
+      </form>
+      <p class="result-count"><b>postgres</b> — 3건</p>
+      <ul class="feed" id="feedSearch"></ul>
+    </section>
+
+  </main>
+</div>
+
+<!-- ═══ 어드민 로그인 ═════════════════════════════════════ -->
+<div class="admin" id="loginShell">
+  <div class="login">
+    <div class="login__card">
+      <span class="brand__name"><span class="brand__dot"></span>blogyu</span>
+      <h1>관리자 로그인</h1>
+      <p>허용된 GitHub 계정만 통과합니다.</p>
+      <button class="btn-gh">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+          <path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 005.47 7.59c.4.07.55-.17.55-.38l-.01-1.49C3.8 14.15 3.34 12.9 3.34 12.9c-.36-.92-.88-1.16-.88-1.16-.72-.49.06-.48.06-.48.79.06 1.21.82 1.21.82.71 1.21 1.86.86 2.31.66.07-.51.28-.86.5-1.06-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 014 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0016 8c0-4.42-3.58-8-8-8z"/>
+        </svg>
+        GitHub으로 계속하기
+      </button>
+      <p class="login__note">세션은 httpOnly 쿠키로 7일간 유지됩니다.<br>허용 계정은 환경변수에 둡니다.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 어드민 — 글 관리 ══════════════════════════════════ -->
+<div class="admin" id="adminShell">
+  <div class="abar">
+    <div class="abar__in">
+      <span class="abar__brand"><span class="brand__dot"></span>blogyu <span class="label">관리자</span></span>
+      <nav class="abar__nav">
+        <a href="#" data-go="admin" aria-current="page">글</a>
+        <a href="#">태그</a>
+        <a href="#">설정</a>
+      </nav>
+      <div class="abar__right">
+        <a class="btn btn--quiet" href="#" data-go="home">블로그 보기 ↗</a>
+        <span class="avatar">hx</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="awrap">
+    <div class="ahead">
+      <div>
+        <h1>글</h1>
+        <p>최근 수정순 · 전체 6편</p>
+      </div>
+      <div style="display:flex;gap:0.6rem;align-items:center">
+        <div class="seg" role="tablist" aria-label="상태 필터">
+          <button role="tab" aria-selected="true">전체<span class="n">6</span></button>
+          <button role="tab" aria-selected="false">발행<span class="n">4</span></button>
+          <button role="tab" aria-selected="false">임시<span class="n">2</span></button>
+        </div>
+        <a class="btn btn--primary" href="#" data-go="editor">새 글</a>
+      </div>
+    </div>
+
+    <table class="atable">
+      <thead>
+        <tr>
+          <th>제목</th>
+          <th>상태</th>
+          <th class="hide-sm">발행일</th>
+          <th class="num hide-sm">조회</th>
+          <th class="num hide-sm">좋아요</th>
+          <th class="acts">&nbsp;</th>
+        </tr>
+      </thead>
+      <tbody id="admRows"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══ 어드민 — 에디터 ═══════════════════════════════════ -->
+<div class="admin" id="editorShell">
+  <div class="abar">
+    <div class="abar__in">
+      <span class="abar__brand"><span class="brand__dot"></span>blogyu <span class="label">관리자</span></span>
+      <div class="abar__right">
+        <span class="avatar">hx</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="awrap">
+    <div class="ed-top">
+      <a class="back" href="#" data-go="admin">← 글</a>
+      <span class="saved">3분 전 자동 저장됨</span>
+      <div style="margin-left:auto;display:flex;gap:0.5rem">
+        <button class="btn">미리보기</button>
+        <button class="btn btn--primary">발행</button>
+      </div>
+    </div>
+
+    <label for="edTitle" class="label" style="display:block;margin-bottom:0.5rem">제목</label>
+    <input class="ed-title" id="edTitle" value="Cloudflare Workers에서 Postgres 연결 최적화하기" placeholder="제목">
+
+    <div class="ed-grid">
+      <div>
+        <div class="ed-tools" role="toolbar" aria-label="서식">
+          <button>H2</button>
+          <button>H3</button>
+          <span class="div" aria-hidden="true"></span>
+          <button>B</button>
+          <button>i</button>
+          <button>link</button>
+          <span class="div" aria-hidden="true"></span>
+          <button>quote</button>
+          <button>list</button>
+          <button>code</button>
+          <button>table</button>
+          <span class="div" aria-hidden="true"></span>
+          <button>image</button>
+        </div>
+        <label for="edBody" class="label" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">본문 마크다운</label>
+        <textarea class="ed-body" id="edBody">## 엣지 런타임의 커넥션 문제
+
+Workers는 요청마다 격리된 컨텍스트에서 실행됩니다.
+프로세스가 살아 있는 동안 커넥션을 재사용하는
+전통적인 풀링 전략이 통하지 않는다는 뜻입니다.
+
+> 엣지에서는 "연결을 오래 붙잡는" 최적화가 아니라
+> "연결을 아예 만들지 않는" 최적화가 필요합니다.
+
+## HTTP 드라이버로 전환
+
+```ts
+export const createDb = (url: string) =>
+  drizzle(neon(url), { schema })
+```
+
+![지연 시간 분포](r2://charts/latency.png)
+</textarea>
+        <div class="ed-drop">이미지를 끌어다 놓거나 붙여넣으면 R2에 올리고 마크다운을 삽입합니다</div>
+      </div>
+
+      <aside class="panel" aria-label="글 설정">
+        <section>
+          <span class="label">발행</span>
+          <div class="radios">
+            <label><input type="radio" name="st" checked> 발행됨</label>
+            <label><input type="radio" name="st"> 임시저장</label>
+            <label><input type="radio" name="st"> 예약</label>
+          </div>
+          <div class="field" style="margin-top:0.8rem">
+            <label for="pub">발행일</label>
+            <input id="pub" type="text" value="2026-08-20 09:00">
+          </div>
+        </section>
+
+        <section>
+          <span class="label">주소</span>
+          <div class="field">
+            <input id="slug" type="text" value="edge-postgres-connection" aria-label="슬러그">
+            <p class="hint">/posts/edge-postgres-connection</p>
+          </div>
+        </section>
+
+        <section>
+          <span class="label">요약</span>
+          <div class="field">
+            <textarea id="exc" aria-label="요약">엣지 런타임에는 TCP 커넥션 풀이 없습니다. HTTP 드라이버로 갈아타면서 측정한 지연 시간을 정리했습니다.</textarea>
+            <p class="hint">148 / 160</p>
+          </div>
+        </section>
+
+        <section>
+          <span class="label">태그</span>
+          <ul class="chips" style="margin-bottom:0.6rem">
+            <li><a href="#">cloudflare ×</a></li>
+            <li><a href="#">postgres ×</a></li>
+            <li><a href="#">edge ×</a></li>
+          </ul>
+          <div class="field">
+            <input type="text" placeholder="입력 후 Enter" aria-label="태그 추가">
+          </div>
+        </section>
+
+        <section>
+          <span class="label">시리즈</span>
+          <div class="field">
+            <select aria-label="시리즈">
+              <option>무료 티어로 블로그 만들기</option>
+              <option>타입 안전 API 설계</option>
+              <option>— 없음 —</option>
+            </select>
+            <p class="hint">2번째 글</p>
+          </div>
+        </section>
+
+        <section>
+          <span class="label">커버 이미지</span>
+          <div class="coverph">1200 × 630</div>
+          <p class="hint">비우면 제목·태그로 OG 이미지를 생성합니다</p>
+        </section>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 시안 컨트롤 ═══════════════════════════════════════ -->
+<nav class="deck" aria-label="시안 화면 전환">
+  <button data-go="home" aria-current="true">홈</button>
+  <button data-go="post">글</button>
+  <button data-go="tag">태그</button>
+  <button data-go="search">검색</button>
+  <span class="sep" aria-hidden="true"></span>
+  <button data-go="login">로그인</button>
+  <button data-go="admin">글 관리</button>
+  <button data-go="editor">에디터</button>
+</nav>
+
+<script>
+(function () {
+  var POSTS = [
+    { t:'Cloudflare Workers에서 Postgres 연결 최적화하기', d:'2026년 8월 20일', r:8, v:'1,240', l:37,
+      tags:['cloudflare','postgres'], slug:'edge-postgres-connection', st:'live',
+      s:'엣지 런타임에는 TCP 커넥션 풀이 없습니다. HTTP 드라이버로 갈아타면서 측정한 지연 시간과, 그 과정에서 알게 된 제약을 정리했습니다.' },
+    { t:'Hono RPC로 프론트엔드까지 타입 전달하기', d:'2026년 8월 12일', r:6, v:'860', l:21,
+      tags:['hono','typescript'], slug:'hono-rpc-types', st:'live',
+      s:'백엔드 라우터의 타입을 그대로 export 해서 프론트엔드 fetch 응답까지 추론시키는 방법. 스키마를 두 번 쓰지 않아도 됩니다.' },
+    { t:'Next.js 16 Cache Components 실전 적용기', d:'2026년 8월 3일', r:12, v:'2,105', l:64,
+      tags:['nextjs','react'], slug:'next16-cache-components', st:'live',
+      s:'목록과 상세에 Cache Components를 붙이면서 어디까지 정적으로 남길 수 있는지 실험했습니다. 조회수 같은 동적 요소와의 경계가 핵심이었습니다.' },
+    { t:'Drizzle 마이그레이션을 CI에 붙이면서 겪은 일', d:'2026년 7월 25일', r:5, v:'540', l:12,
+      tags:['drizzle','ci'], slug:'drizzle-ci-migration', st:'live',
+      s:'스키마 변경을 PR 단계에서 검증하고 배포 시 자동 적용하기까지. 롤백 전략이 없으면 결국 손으로 고치게 됩니다.' },
+    { t:'pnpm workspace에서 타입 공유 패키지 설계', d:'2026년 7월 14일', r:9, v:'1,020', l:29,
+      tags:['pnpm','monorepo'], slug:'pnpm-shared-types', st:'draft',
+      s:'프론트·백엔드가 함께 쓰는 타입을 어느 패키지에 두고 어떻게 빌드할지. 빌드 없이 소스를 직접 참조하는 쪽이 개발 속도에 유리했습니다.' },
+    { t:'ISR 재검증을 웹훅으로 트리거하기', d:'—', r:7, v:'—', l:'—',
+      tags:['nextjs','vercel'], slug:'isr-webhook-revalidate', st:'draft',
+      s:'어드민에서 글을 발행하면 해당 경로만 즉시 갱신되도록. 전체 재빌드 없이 몇 초 안에 반영됩니다.' }
+  ];
+
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c];
+    });
+  }
+
+  function entry(p, i, opts) {
+    opts = opts || {};
+    var sum = opts.hl
+      ? esc(p.s).replace(/postgres/gi, function (m) { return '<mark class="hit">' + m + '</mark>'; })
+      : esc(p.s);
+    return '<li><article class="entry">' +
+      '<span class="entry__idx" aria-hidden="true">' + String(i + 1) + '</span>' +
+      '<p class="entry__meta">' + esc(p.d) + ' · ' + p.r + '분</p>' +
+      '<h2 class="entry__title"><a href="#" data-go="post">' + esc(p.t) + '</a></h2>' +
+      '<p class="entry__sum entry__sum--clamp">' + sum + '</p>' +
+      '<ul class="chips">' + p.tags.map(function (t) {
+        return '<li><a href="#" data-go="tag">' + esc(t) + '</a></li>';
+      }).join('') + '</ul>' +
+      '</article></li>';
+  }
+
+  function feed(el, list, opts) {
+    document.getElementById(el).innerHTML = list.map(function (p, i) { return entry(p, i, opts); }).join('');
+  }
+
+  feed('feedHome', POSTS);
+  feed('feedTag', POSTS.slice(0, 3));
+  feed('feedSearch', [POSTS[0], POSTS[4], POSTS[3]], { hl: true });
+
+  document.getElementById('admRows').innerHTML = POSTS.map(function (p) {
+    var pill = p.st === 'live'
+      ? '<span class="pill pill--live">발행됨</span>'
+      : '<span class="pill">임시저장</span>';
+    return '<tr>' +
+      '<td><a class="t" href="#" data-go="editor">' + esc(p.t) + '</a><span class="slug">/' + esc(p.slug) + '</span></td>' +
+      '<td>' + pill + '</td>' +
+      '<td class="hide-sm dt">' + esc(p.d) + '</td>' +
+      '<td class="num hide-sm">' + esc(p.v) + '</td>' +
+      '<td class="num hide-sm">' + esc(p.l) + '</td>' +
+      '<td class="acts"><a href="#" data-go="editor">편집</a><a href="#" data-go="post">보기</a></td>' +
+      '</tr>';
+  }).join('');
+
+  // ── 화면 전환 ────────────────────────────────────────
+  var READER = ['home', 'post', 'tag', 'search'];
+  var SHELLS = { login: 'loginShell', admin: 'adminShell', editor: 'editorShell' };
+
+  function go(name) {
+    document.body.dataset.screen = name;
+    var isReader = READER.indexOf(name) !== -1;
+
+    document.getElementById('readerShell').classList.toggle('is-on', isReader);
+    Object.keys(SHELLS).forEach(function (k) {
+      document.getElementById(SHELLS[k]).classList.toggle('is-on', k === name);
+    });
+    document.querySelectorAll('.view').forEach(function (v) {
+      v.hidden = v.dataset.view !== name;
+    });
+    document.querySelectorAll('.deck [data-go]').forEach(function (b) {
+      b.setAttribute('aria-current', String(b.dataset.go === name));
+    });
+    window.scrollTo(0, 0);
+  }
+
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-go]');
+    if (t) {
+      if (t.tagName === 'A') e.preventDefault();
+      go(t.dataset.go);
+      return;
+    }
+
+    var like = e.target.closest('#likeBtn');
+    if (like) {
+      var on = like.getAttribute('aria-pressed') === 'true';
+      like.setAttribute('aria-pressed', String(!on));
+      document.getElementById('likeN').textContent = on ? 37 : 38;
+      return;
+    }
+
+    var tab = e.target.closest('[role="tab"]');
+    if (tab) {
+      tab.parentElement.querySelectorAll('[role="tab"]').forEach(function (x) {
+        x.setAttribute('aria-selected', String(x === tab));
+      });
+    }
+  });
+
+  // ── 테마 ─────────────────────────────────────────────
+  var root = document.documentElement;
+  if (!window.matchMedia('(prefers-color-scheme: dark)').matches) root.classList.remove('dark');
+
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    root.classList.toggle('dark');
+  });
+
+  // ── 시그니처 ① 목차 마커 ──────────────────────────────
+  var links = [].slice.call(document.querySelectorAll('.toc a[data-toc]'));
+  var marker = document.getElementById('tocMarker');
+
+  function setActive(id) {
+    var hit = null;
+    links.forEach(function (a) {
+      var on = a.dataset.toc === id;
+      a.setAttribute('aria-current', String(on));
+      if (on) hit = a;
+    });
+    if (hit && marker) {
+      var box = hit.getBoundingClientRect();
+      var rail = marker.parentElement.getBoundingClientRect();
+      marker.style.transform = 'translateY(' + (box.top - rail.top) + 'px)';
+      marker.style.height = box.height + 'px';
+    }
+  }
+
+  var heads = ['h1', 'h2', 'h2a', 'h2b', 'h3']
+    .map(function (id) { return document.getElementById(id); })
+    .filter(Boolean);
+
+  var io = new IntersectionObserver(function (ents) {
+    ents.forEach(function (en) {
+      if (en.isIntersecting) setActive(en.target.id);
+    });
+  }, { rootMargin: '-8% 0px -72% 0px', threshold: 0 });
+
+  heads.forEach(function (h) { io.observe(h); });
+  setActive('h1');
+
+  document.querySelector('.toc').addEventListener('click', function (e) {
+    var a = e.target.closest('a[data-toc]');
+    if (a) setActive(a.dataset.toc);
+  });
+
+  // ── 단축키 ───────────────────────────────────────────
+  var ORDER = ['home', 'post', 'tag', 'search', 'login', 'admin', 'editor'];
+  document.addEventListener('keydown', function (e) {
+    var tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    var i = ORDER.indexOf(document.body.dataset.screen);
+    go(ORDER[e.key === 'ArrowRight' ? (i + 1) % ORDER.length : (i - 1 + ORDER.length) % ORDER.length]);
+  });
+
+  go('home');
+})();
+</script>
+</body>
+</html>
