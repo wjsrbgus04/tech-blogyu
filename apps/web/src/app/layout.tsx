@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     default: 'blogyu',
     template: '%s · blogyu',
   },
-  description: '엣지 런타임과 타입 안전한 API에 대해 씁니다. 대체로 실패한 이야기.',
+  description: '직접 경험한 것과 해결해본 것에 대해 씁니다. 대체로 실패한 이야기.',
   openGraph: {
     type: 'website',
     siteName: 'blogyu',
