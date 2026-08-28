@@ -86,6 +86,9 @@ export default async function TagArchivePage({
     // 글을 못 불러와도 태그 헤더는 보여준다
   }
 
+  // 범위 밖 페이지는 404 (홈과 같은 이유)
+  if (page > 1 && page > totalPages) notFound()
+
   return (
     <Shell sidebar={<Sidebar />}>
       <header className="mb-1 border-border border-b pb-6">

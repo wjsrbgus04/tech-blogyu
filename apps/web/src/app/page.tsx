@@ -1,3 +1,4 @@
+import { notFound } from 'next/navigation'
 import { Pagination } from '@/components/pagination'
 import { PostList, type PostSummary } from '@/components/postList'
 import { Shell } from '@/components/shell'
@@ -27,6 +28,12 @@ async function loadPosts(page: number) {
 export default async function HomePage({ searchParams }: { searchParams: Promise<Search> }) {
   const page = Math.max(1, Number((await searchParams).page ?? '1') || 1)
   const data = await loadPosts(page)
+  /**
+   * 범위 밖 페이지는 빈 목록이 아니라 404 다.
+   * 그냥 두면 "아직 쓴 글이 없습니다"라는 거짓 안내가 나가고,
+   * 검색엔진이 ?page=999 같은 빈 페이지를 끝없이 색인한다.
+   */
+  if (data && page > 1 && page > data.totalPages) notFound()
 
   return (
     <Shell sidebar={<Sidebar />}>
