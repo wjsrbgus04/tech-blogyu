@@ -150,23 +150,23 @@ AUTH_COOKIE_DOMAIN=".blogyu.dev"
 pnpm lint && pnpm typecheck && pnpm test && pnpm build
 ```
 
-그리고 **도메인 값 네 개를 실제 주소로 바꾼다.** web과 api가 서로를 가리키므로 짝이 맞아야 한다.
+**도메인 값 네 개가 서로를 가리킨다.** 커스텀 도메인을 붙이거나 계정을 옮기면 네 개를 같이 고쳐야 한다. 하나만 바꾸면 CORS나 재검증이 조용히 깨진다.
 
 `apps/api/wrangler.jsonc`의 `vars`:
 
-| 키 | 지금 값 | 무엇에 쓰이나 |
-|---|---|---|
-| `SITE_URL` | `https://blogyu-web.workers.dev` | CORS 허용 오리진, OAuth 리다이렉트, 쿠키 Secure 판정, ISR 재검증 웹훅 |
-| `MEDIA_BASE_URL` | `https://blogyu-api.workers.dev/media` | 업로드된 이미지 URL 앞부분 |
+| 키 | 무엇에 쓰이나 |
+|---|---|
+| `SITE_URL` | CORS 허용 오리진, OAuth 리다이렉트, 쿠키 Secure 판정, ISR 재검증 웹훅 |
+| `MEDIA_BASE_URL` | 업로드된 이미지 URL 앞부분 |
 
 `apps/web/.env.production`:
 
-| 키 | 지금 값 | 무엇에 쓰이나 |
-|---|---|---|
-| `NEXT_PUBLIC_API_URL` | `https://blogyu-api.workers.dev` | 브라우저·서버 양쪽에서 API를 부르는 주소 |
-| `NEXT_PUBLIC_SITE_URL` | `https://blogyu-web.workers.dev` | 사이트맵·RSS·OG 링크의 절대 주소 |
+| 키 | 무엇에 쓰이나 |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | 브라우저·서버 양쪽에서 API를 부르는 주소 |
+| `NEXT_PUBLIC_SITE_URL` | 사이트맵·RSS·OG 링크의 절대 주소 |
 
-실제 워커 주소는 첫 배포 출력(`wrangler deploy`)에서 확인한다 — `<워커이름>.<계정 서브도메인>.workers.dev` 꼴이다.
+워커 주소는 `<워커이름>.<계정 서브도메인>.workers.dev` 꼴이다. 서브도메인은 `wrangler whoami` 로 계정을 확인한 뒤 대시보드에서 볼 수 있다.
 
 주의할 점이 둘 있다.
 

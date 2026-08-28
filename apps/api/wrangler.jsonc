@@ -23,15 +23,15 @@
   // 반대로 하면 배포 시 SITE_URL 이 localhost 로 나가면서
   // CORS 거부·OAuth 리다이렉트 실패·재검증 웹훅 실패가 한꺼번에 터진다.
   //
-  // ⚠️ 배포 전 아래 두 값을 실제 도메인으로 반드시 바꾼다 (README "배포 전 점검").
   //    web 쪽 apps/web/.env.production 의 값과 반드시 짝을 맞춘다.
+  //    커스텀 도메인을 붙이면 양쪽을 같이 바꾼다.
   // ─────────────────────────────────────────────────────────────────
   "vars": {
     // 비밀이 아닌 값만 여기 둔다. 시크릿은 `wrangler secret put` 으로 넣는다.
     "ADMIN_GITHUB_LOGINS": "wjsrbgus04",
     // blogyu-web 워커의 오리진. CORS 허용·OAuth 리다이렉트·재검증 웹훅에 쓴다.
-    "SITE_URL": "https://blogyu-web.workers.dev",
+    "SITE_URL": "https://blogyu-web.jgh10070.workers.dev",
     // 업로드 이미지 URL 앞부분. api 가 /media/* 로 R2 를 중계한다.
-    "MEDIA_BASE_URL": "https://blogyu-api.workers.dev/media"
+    "MEDIA_BASE_URL": "https://blogyu-api.jgh10070.workers.dev/media"
   }
 }
