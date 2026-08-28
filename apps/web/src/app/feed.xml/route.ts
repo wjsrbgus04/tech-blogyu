@@ -27,7 +27,7 @@ export async function GET() {
   <channel>
     <title>blogyu</title>
     <link>${SITE_URL}</link>
-    <description>엣지 런타임과 타입 안전한 API에 대해 씁니다.</description>
+    <description>직접 경험한 것과 해결해본 것에 대해 씁니다.</description>
     <language>ko</language>
     <atom:link href="${SITE_URL}/feed.xml" rel="self" type="application/rss+xml" />
 ${items
