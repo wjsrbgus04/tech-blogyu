@@ -12,8 +12,12 @@ import {
 } from 'drizzle-orm/pg-core'
 
 /**
- * 발행 상태. 'scheduled' 는 publishedAt 이 미래인 글을 뜻하며,
- * 목록 쿼리에서 `status = 'published' AND published_at <= now()` 로 함께 걸러진다.
+ * 발행 상태. 'scheduled' 는 publishedAt 이 미래인 글을 뜻한다.
+ *
+ * 공개 여부는 상태가 아니라 시각이 정한다. 목록 쿼리는
+ * `status in ('published','scheduled') AND published_at <= now()` 로 거른다
+ * (db/filters.ts 의 isPublicPost). 상태만 보고 거르면 예약한 글이
+ * 시각이 지나도 영영 나오지 않는다.
  */
 export const postStatus = pgEnum('post_status', ['draft', 'published', 'scheduled'])
 
@@ -32,7 +36,7 @@ export const posts = pgTable(
     id: uuid().primaryKey().defaultRandom(),
     slug: varchar({ length: 160 }).notNull().unique(),
     title: text().notNull(),
-    /** 목록·검색·OG 이미지에 쓰는 요약. 어드민에서 160자로 제한한다. */
+    /** 목록·검색·OG 이미지에 쓰는 요약. 실제 입력 제한은 lib/schemas.ts 가 정한다. */
     excerpt: varchar({ length: 300 }).notNull(),
     /** 마크다운 원문. 렌더링은 web 쪽에서 한다. */
     content: text().notNull(),

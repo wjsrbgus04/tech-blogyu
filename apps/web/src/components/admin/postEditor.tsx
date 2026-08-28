@@ -9,6 +9,19 @@ import { API_URL, api, uncached } from '@/lib/apiClient'
 
 type Status = 'draft' | 'published' | 'scheduled'
 
+/**
+ * 입력 길이 제한. 서버(apps/api/src/lib/schemas.ts 의 POST_LIMITS)와 같은 값이어야 한다.
+ * 저장 버튼을 눌러야 알게 되는 대신 쓰는 동안 남은 글자 수가 보이도록 여기서도 건다.
+ */
+const LIMITS = {
+  slug: 60,
+  title: 100,
+  excerpt: 160,
+  content: 10_000,
+  tag: 20,
+  tagCount: 10,
+} as const
+
 export type EditorValue = {
   slug: string
   title: string
@@ -150,7 +163,7 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
 
   function addTag(raw: string) {
     const tag = raw.trim().toLowerCase().replace(/\s+/g, '-')
-    if (!tag || value.tags.includes(tag) || value.tags.length >= 10) return
+    if (!tag || value.tags.includes(tag) || value.tags.length >= LIMITS.tagCount) return
     patch({ tags: [...value.tags, tag] })
     setTagInput('')
   }
@@ -286,6 +299,7 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
           id="post-title"
           value={value.title}
           onChange={(event) => patch({ title: event.target.value })}
+          maxLength={LIMITS.title}
           placeholder="제목"
           className="no-focus-underline mb-5 w-full border-border border-b bg-transparent pb-4 font-bold text-[1.75rem] leading-[1.4] tracking-[-0.008em] outline-none placeholder:text-fg-faint focus:border-accent"
         />
@@ -332,6 +346,7 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
                   ref={textareaRef}
                   value={value.content}
                   onChange={(event) => patch({ content: event.target.value })}
+                  maxLength={LIMITS.content}
                   onDrop={handleDrop}
                   onPaste={handlePaste}
                   spellCheck={false}
@@ -340,6 +355,10 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
 
                 <p className="rounded-b-md border border-border border-t-0 border-dashed p-3.5 text-center text-[0.75rem] text-fg-faint">
                   이미지를 끌어다 놓거나 붙여넣으면 R2에 올리고 마크다운을 삽입합니다
+                </p>
+
+                <p className="mono mt-1.5 text-right text-[0.625rem] text-fg-faint">
+                  {value.content.length.toLocaleString()} / {LIMITS.content.toLocaleString()}
                 </p>
               </>
             ) : (
@@ -398,6 +417,7 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
               <input
                 value={value.slug}
                 onChange={(event) => patch({ slug: event.target.value })}
+                maxLength={LIMITS.slug}
                 placeholder="edge-postgres-connection"
                 aria-label="슬러그"
                 className="w-full rounded-sm border border-transparent bg-bg-subtle px-2.5 py-1.5 text-[0.8125rem] focus:border-border-strong focus:bg-bg"
@@ -412,11 +432,12 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
               <textarea
                 value={value.excerpt}
                 onChange={(event) => patch({ excerpt: event.target.value })}
+                maxLength={LIMITS.excerpt}
                 aria-label="요약"
                 className="min-h-[5.5rem] w-full resize-y rounded-sm border border-transparent bg-bg-subtle px-2.5 py-1.5 text-[0.8125rem] leading-relaxed focus:border-border-strong focus:bg-bg"
               />
               <p className="mono mt-1.5 text-[0.625rem] text-fg-faint">
-                {value.excerpt.length} / 160
+                {value.excerpt.length} / {LIMITS.excerpt}
               </p>
             </section>
 
@@ -440,6 +461,7 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
               <input
                 value={tagInput}
                 onChange={(event) => setTagInput(event.target.value)}
+                maxLength={LIMITS.tag}
                 onKeyDown={(event) => {
                   if (event.key !== 'Enter') return
                   event.preventDefault()
