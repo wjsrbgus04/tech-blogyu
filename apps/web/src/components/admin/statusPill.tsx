@@ -21,8 +21,8 @@ export function StatusPill({ status }: { status: PostStatus }) {
     <span
       className={
         isLive || isScheduled
-          ? 'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-accent-weak px-2 py-0.5 text-[0.75rem] text-accent-ink'
-          : 'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border px-2 py-0.5 text-[0.75rem] text-fg-muted'
+          ? 'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-accent-weak px-2 py-0.5 text-[1rem] text-accent-ink'
+          : 'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border px-2 py-0.5 text-[1rem] text-fg-muted'
       }
     >
       <span

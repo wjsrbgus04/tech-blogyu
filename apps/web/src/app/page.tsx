@@ -41,7 +41,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         <h1 className="label">최근 글</h1>
         <a
           href="/feed.xml"
-          className="text-[0.75rem] text-fg-faint transition-colors hover:text-accent-ink"
+          className="text-[1rem] text-fg-faint transition-colors hover:text-accent-ink"
         >
           RSS 구독
         </a>
@@ -53,7 +53,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           <Pagination page={data.page} totalPages={data.totalPages} />
         </>
       ) : (
-        <p className="py-16 text-center text-[0.9375rem] text-fg-faint">
+        <p className="py-16 text-center text-[1.1875rem] text-fg-faint">
           글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
         </p>
       )}

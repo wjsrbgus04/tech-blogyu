@@ -38,7 +38,7 @@ export async function Sidebar({ toc }: { toc?: ReactNode }) {
           <span className="size-[7px] shrink-0 rounded-full bg-accent transition-transform group-hover:scale-[1.45]" />
           blogyu
         </span>
-        <span className="mt-2 block text-[0.8125rem] text-fg-muted leading-relaxed">
+        <span className="mt-2 block text-[1.0625rem] text-fg-muted leading-relaxed">
           엣지 런타임과 타입 안전한 API에 대해 씁니다. 대체로 실패한 이야기.
         </span>
       </Link>
@@ -68,7 +68,7 @@ export async function Sidebar({ toc }: { toc?: ReactNode }) {
             name="q"
             placeholder="검색"
             aria-label="블로그 검색"
-            className="w-full rounded-sm border border-transparent bg-bg-subtle py-2 pr-3 pl-[1.9rem] text-[0.8125rem] transition-colors placeholder:text-fg-faint hover:border-border focus:border-border-strong focus:bg-bg"
+            className="w-full rounded-sm border border-transparent bg-bg-subtle py-2 pr-3 pl-[1.9rem] text-[1.0625rem] transition-colors placeholder:text-fg-faint hover:border-border focus:border-border-strong focus:bg-bg"
           />
         </form>
       </search>
@@ -76,7 +76,7 @@ export async function Sidebar({ toc }: { toc?: ReactNode }) {
       {tags.length > 0 && (
         <div>
           <span className="label mb-[0.65rem] block">태그</span>
-          <ul className="text-[0.8125rem]">
+          <ul className="text-[1.0625rem]">
             {tags.map((tag) => (
               <li key={tag.name} className="mt-[0.15rem] first:mt-0">
                 <Link
@@ -84,14 +84,14 @@ export async function Sidebar({ toc }: { toc?: ReactNode }) {
                   className="-ml-2 flex items-baseline justify-between gap-2 rounded-sm py-[0.22rem] pr-[0.45rem] pl-2 text-fg-muted transition-colors hover:bg-bg-subtle hover:text-fg"
                 >
                   <span>{tag.name}</span>
-                  <span className="tabular text-[0.75rem] text-fg-faint">{tag.count}</span>
+                  <span className="tabular text-[1rem] text-fg-faint">{tag.count}</span>
                 </Link>
               </li>
             ))}
           </ul>
           <Link
             href="/tags"
-            className="-ml-2 mt-1 block pl-2 text-[0.75rem] text-fg-faint transition-colors hover:text-accent-ink"
+            className="-ml-2 mt-1 block pl-2 text-[1rem] text-fg-faint transition-colors hover:text-accent-ink"
           >
             전체 태그 →
           </Link>
@@ -101,7 +101,7 @@ export async function Sidebar({ toc }: { toc?: ReactNode }) {
       {series.length > 0 && (
         <div>
           <span className="label mb-[0.65rem] block">시리즈</span>
-          <ul className="text-[0.8125rem]">
+          <ul className="text-[1.0625rem]">
             {series.map((item) => (
               <li key={item.slug} className="mt-[0.15rem] first:mt-0">
                 <Link
@@ -109,7 +109,7 @@ export async function Sidebar({ toc }: { toc?: ReactNode }) {
                   className="-ml-2 flex items-baseline justify-between gap-2 rounded-sm py-[0.22rem] pr-[0.45rem] pl-2 text-fg-muted transition-colors hover:bg-bg-subtle hover:text-fg"
                 >
                   <span>{item.title}</span>
-                  <span className="tabular text-[0.75rem] text-fg-faint">{item.count}</span>
+                  <span className="tabular text-[1rem] text-fg-faint">{item.count}</span>
                 </Link>
               </li>
             ))}
@@ -117,12 +117,12 @@ export async function Sidebar({ toc }: { toc?: ReactNode }) {
         </div>
       )}
 
-      <div className="mt-auto flex items-center gap-3.5 border-border border-t pt-5 text-[0.75rem] text-fg-faint max-lg:mt-0">
+      <div className="mt-auto flex items-center gap-3.5 border-border border-t pt-5 text-[1rem] text-fg-faint max-lg:mt-0">
         <a href="/feed.xml" className="transition-colors hover:text-fg">
           RSS
         </a>
         <a
-          href="https://github.com/wjsrbgus04"
+          href="https://github.com/wjsrbgus04/tech-blogyu"
           target="_blank"
           rel="noreferrer"
           className="transition-colors hover:text-fg"

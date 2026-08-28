@@ -66,7 +66,7 @@ export function Comments() {
 
   if (!REPO_ID || !CATEGORY_ID) {
     return (
-      <p className="rounded-md border border-border-strong border-dashed px-5 py-9 text-center text-[0.8125rem] text-fg-faint leading-relaxed">
+      <p className="rounded-md border border-border-strong border-dashed px-5 py-9 text-center text-[1.0625rem] text-fg-faint leading-relaxed">
         댓글을 쓰려면 Giscus 설정이 필요합니다.
         <br />
         giscus.app 에서 발급받은 값을 NEXT_PUBLIC_GISCUS_* 에 넣어주세요.

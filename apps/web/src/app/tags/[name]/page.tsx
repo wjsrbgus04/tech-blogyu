@@ -96,7 +96,7 @@ export default async function TagArchivePage({
           <span className="text-accent">#</span>
           {tag.name}
         </h1>
-        <p className="max-w-[46ch] text-[0.875rem] text-fg-muted">
+        <p className="max-w-[46ch] text-[1.125rem] text-fg-muted">
           {tag.description ?? `${tag.name} 태그가 붙은 글 ${tag.count}편.`}
         </p>
       </header>

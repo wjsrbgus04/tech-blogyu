@@ -114,7 +114,7 @@ export default async function PostPage({ params }: { params: Promise<Params> }) 
       <article className="max-w-[44rem]">
         <header className="mb-11 border-border border-b pb-8">
           {/* 날짜와 상대 표기만. 읽는 시간은 아래로 내려 둘을 섞지 않는다. */}
-          <p className="tabular mb-[1.1rem] flex flex-wrap items-baseline gap-2.5 text-[0.8125rem] text-fg-faint">
+          <p className="tabular mb-[1.1rem] flex flex-wrap items-baseline gap-2.5 text-[1.0625rem] text-fg-faint">
             <time dateTime={toIsoDate(post.publishedAt)}>{formatDate(post.publishedAt)}</time>
             <RelativeTime iso={toIsoDate(post.publishedAt) ?? null} />
           </p>
@@ -141,7 +141,7 @@ export default async function PostPage({ params }: { params: Promise<Params> }) 
             ) : (
               <span />
             )}
-            <span className="tabular text-[0.8125rem] text-fg-faint">
+            <span className="tabular text-[1.0625rem] text-fg-faint">
               {post.readingMinutes}분 분량
             </span>
           </div>
@@ -153,14 +153,14 @@ export default async function PostPage({ params }: { params: Promise<Params> }) 
         {series && (
           <aside className="my-10 rounded-md border border-border bg-bg-subtle px-5 py-[1.1rem]">
             <span className="label mb-3 block">시리즈 · {series.title}</span>
-            <ol className="text-[0.875rem]">
+            <ol className="text-[1.125rem]">
               {series.posts.map((item, index) => {
                 const isCurrent = item.slug === post.slug
                 return (
                   <li key={item.slug} className="flex gap-2.5 py-1">
                     <span
                       aria-hidden="true"
-                      className={`tabular shrink-0 pt-0.5 text-[0.8125rem] ${isCurrent ? 'text-accent-ink' : 'text-fg-faint'}`}
+                      className={`tabular shrink-0 pt-0.5 text-[1.0625rem] ${isCurrent ? 'text-accent-ink' : 'text-fg-faint'}`}
                     >
                       {index + 1}.
                     </span>
@@ -183,7 +183,7 @@ export default async function PostPage({ params }: { params: Promise<Params> }) 
         <ViewCounter slug={post.slug} />
 
         <section aria-label="댓글" className="mt-16 border-border border-t pt-8">
-          <h2 className="mb-5 text-[0.9375rem]">댓글</h2>
+          <h2 className="mb-5 text-[1.1875rem]">댓글</h2>
           <Comments />
         </section>
       </article>

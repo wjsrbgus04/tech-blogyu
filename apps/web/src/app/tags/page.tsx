@@ -30,10 +30,10 @@ export default async function TagsPage() {
           <Link
             key={tag.name}
             href={`/tags/${tag.name}`}
-            className="inline-flex items-baseline gap-1.5 rounded-sm border border-border px-2.5 py-1.5 text-[0.875rem] text-fg-muted transition-colors hover:border-border-strong hover:text-fg"
+            className="inline-flex items-baseline gap-1.5 rounded-sm border border-border px-2.5 py-1.5 text-[1.125rem] text-fg-muted transition-colors hover:border-border-strong hover:text-fg"
           >
             {tag.name}
-            <span className="tabular text-[0.75rem] opacity-55">{tag.count}</span>
+            <span className="tabular text-[1rem] opacity-55">{tag.count}</span>
           </Link>
         ))}
       </div>

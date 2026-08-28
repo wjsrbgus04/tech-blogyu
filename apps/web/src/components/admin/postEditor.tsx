@@ -243,25 +243,25 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
         <div className="mb-6 flex flex-wrap items-center gap-3 border-border border-b pb-[1.1rem]">
           <Link
             href="/admin"
-            className="text-[0.8125rem] text-fg-muted transition-colors hover:text-fg"
+            className="text-[1.0625rem] text-fg-muted transition-colors hover:text-fg"
           >
             ← 글
           </Link>
 
           {status && (
-            <span className="inline-flex items-center gap-1.5 text-[0.75rem] text-fg-faint before:size-[5px] before:rounded-full before:bg-accent before:content-['']">
+            <span className="inline-flex items-center gap-1.5 text-[1rem] text-fg-faint before:size-[5px] before:rounded-full before:bg-accent before:content-['']">
               {status}
             </span>
           )}
           {dirty && !status && (
-            <span className="text-[0.75rem] text-fg-faint">저장하지 않은 변경이 있습니다</span>
+            <span className="text-[1rem] text-fg-faint">저장하지 않은 변경이 있습니다</span>
           )}
 
           <div className="ml-auto flex gap-2">
             <button
               type="button"
               onClick={() => (tab === 'write' ? openPreview() : setTab('write'))}
-              className="cursor-pointer rounded-sm border border-border px-3.5 py-2 font-[520] text-[0.8125rem] transition-colors hover:border-border-strong hover:bg-bg-subtle"
+              className="cursor-pointer rounded-sm border border-border px-3.5 py-2 font-[520] text-[1.0625rem] transition-colors hover:border-border-strong hover:bg-bg-subtle"
             >
               {tab === 'write' ? '미리보기' : '편집'}
             </button>
@@ -269,7 +269,7 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
               type="button"
               disabled={saving}
               onClick={() => save('draft')}
-              className="cursor-pointer rounded-sm border border-border px-3.5 py-2 font-[520] text-[0.8125rem] transition-colors hover:border-border-strong hover:bg-bg-subtle disabled:opacity-50"
+              className="cursor-pointer rounded-sm border border-border px-3.5 py-2 font-[520] text-[1.0625rem] transition-colors hover:border-border-strong hover:bg-bg-subtle disabled:opacity-50"
             >
               임시저장
             </button>
@@ -279,7 +279,7 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
               /* 라디오에서 고른 상태가 곧 발행 방식이다. 여기서 'published' 를
                  강제하면 예약을 골라도 즉시 발행으로 저장돼 버린다. */
               onClick={() => save(value.status === 'draft' ? 'published' : value.status)}
-              className="cursor-pointer rounded-sm border border-accent bg-accent px-3.5 py-2 font-[600] text-[0.8125rem] text-accent-fg transition-[filter] hover:brightness-105 disabled:opacity-50"
+              className="cursor-pointer rounded-sm border border-accent bg-accent px-3.5 py-2 font-[600] text-[1.0625rem] text-accent-fg transition-[filter] hover:brightness-105 disabled:opacity-50"
             >
               {saving ? '저장 중…' : value.status === 'scheduled' ? '예약 발행' : '발행'}
             </button>
@@ -287,7 +287,7 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
         </div>
 
         {error && (
-          <p className="mb-4 rounded-sm border border-border bg-bg-subtle px-4 py-3 text-[0.8125rem] text-fg">
+          <p className="mb-4 rounded-sm border border-border bg-bg-subtle px-4 py-3 text-[1.0625rem] text-fg">
             {error}
           </p>
         )}
@@ -318,12 +318,12 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
                       key={tool.label}
                       type="button"
                       onClick={() => insert(tool.before, tool.after)}
-                      className="cursor-pointer rounded-[4px] px-2 py-1 text-[0.8125rem] text-fg-muted transition-colors hover:bg-bg hover:text-fg"
+                      className="cursor-pointer rounded-[4px] px-2 py-1 text-[1.0625rem] text-fg-muted transition-colors hover:bg-bg hover:text-fg"
                     >
                       {tool.label}
                     </button>
                   ))}
-                  <label className="ml-auto cursor-pointer rounded-[4px] px-2 py-1 text-[0.8125rem] text-fg-muted transition-colors hover:bg-bg hover:text-fg">
+                  <label className="ml-auto cursor-pointer rounded-[4px] px-2 py-1 text-[1.0625rem] text-fg-muted transition-colors hover:bg-bg hover:text-fg">
                     이미지
                     <input
                       type="file"
@@ -350,14 +350,14 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
                   onDrop={handleDrop}
                   onPaste={handlePaste}
                   spellCheck={false}
-                  className="mono min-h-[26rem] w-full resize-y border border-border bg-bg p-[1.15rem] text-[0.8125rem] leading-[1.85] text-fg-muted outline-none focus:border-border-strong"
+                  className="mono min-h-[26rem] w-full resize-y border border-border bg-bg p-[1.15rem] text-[1.0625rem] leading-[1.85] text-fg-muted outline-none focus:border-border-strong"
                 />
 
-                <p className="rounded-b-md border border-border border-t-0 border-dashed p-3.5 text-center text-[0.75rem] text-fg-faint">
+                <p className="rounded-b-md border border-border border-t-0 border-dashed p-3.5 text-center text-[1rem] text-fg-faint">
                   이미지를 끌어다 놓거나 붙여넣으면 R2에 올리고 마크다운을 삽입합니다
                 </p>
 
-                <p className="mono mt-1.5 text-right text-[0.625rem] text-fg-faint">
+                <p className="mono mt-1.5 text-right text-[0.875rem] text-fg-faint">
                   {value.content.length.toLocaleString()} / {LIMITS.content.toLocaleString()}
                 </p>
               </>
@@ -375,7 +375,7 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
           >
             <section className="border-border border-b p-4">
               <span className="label mb-3 block">발행</span>
-              <div className="flex flex-col gap-2 text-[0.8125rem] text-fg-muted">
+              <div className="flex flex-col gap-2 text-[1.0625rem] text-fg-muted">
                 {(['published', 'draft', 'scheduled'] as const).map((option) => (
                   <label key={option} className="flex cursor-pointer items-center gap-2">
                     <input
@@ -392,7 +392,7 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
 
               {value.status === 'scheduled' && (
                 <div className="mt-3">
-                  <label htmlFor="published-at" className="mb-1 block text-[0.75rem] text-fg-muted">
+                  <label htmlFor="published-at" className="mb-1 block text-[1rem] text-fg-muted">
                     발행 시각
                   </label>
                   <input
@@ -406,7 +406,7 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
                           : null,
                       })
                     }
-                    className="w-full rounded-sm border border-transparent bg-bg-subtle px-2.5 py-1.5 text-[0.8125rem] focus:border-border-strong focus:bg-bg"
+                    className="w-full rounded-sm border border-transparent bg-bg-subtle px-2.5 py-1.5 text-[1.0625rem] focus:border-border-strong focus:bg-bg"
                   />
                 </div>
               )}
@@ -420,9 +420,9 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
                 maxLength={LIMITS.slug}
                 placeholder="edge-postgres-connection"
                 aria-label="슬러그"
-                className="w-full rounded-sm border border-transparent bg-bg-subtle px-2.5 py-1.5 text-[0.8125rem] focus:border-border-strong focus:bg-bg"
+                className="w-full rounded-sm border border-transparent bg-bg-subtle px-2.5 py-1.5 text-[1.0625rem] focus:border-border-strong focus:bg-bg"
               />
-              <p className="mono mt-1.5 text-[0.625rem] text-fg-faint">
+              <p className="mono mt-1.5 text-[0.875rem] text-fg-faint">
                 /posts/{value.slug || '…'}
               </p>
             </section>
@@ -434,9 +434,9 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
                 onChange={(event) => patch({ excerpt: event.target.value })}
                 maxLength={LIMITS.excerpt}
                 aria-label="요약"
-                className="min-h-[5.5rem] w-full resize-y rounded-sm border border-transparent bg-bg-subtle px-2.5 py-1.5 text-[0.8125rem] leading-relaxed focus:border-border-strong focus:bg-bg"
+                className="min-h-[5.5rem] w-full resize-y rounded-sm border border-transparent bg-bg-subtle px-2.5 py-1.5 text-[1.0625rem] leading-relaxed focus:border-border-strong focus:bg-bg"
               />
-              <p className="mono mt-1.5 text-[0.625rem] text-fg-faint">
+              <p className="mono mt-1.5 text-[0.875rem] text-fg-faint">
                 {value.excerpt.length} / {LIMITS.excerpt}
               </p>
             </section>
@@ -469,7 +469,7 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
                 }}
                 placeholder="입력 후 Enter"
                 aria-label="태그 추가"
-                className="w-full rounded-sm border border-transparent bg-bg-subtle px-2.5 py-1.5 text-[0.8125rem] focus:border-border-strong focus:bg-bg"
+                className="w-full rounded-sm border border-transparent bg-bg-subtle px-2.5 py-1.5 text-[1.0625rem] focus:border-border-strong focus:bg-bg"
               />
             </section>
 
@@ -479,7 +479,7 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
                 value={value.seriesId ?? ''}
                 onChange={(event) => patch({ seriesId: event.target.value || null })}
                 aria-label="시리즈"
-                className="w-full rounded-sm border border-transparent bg-bg-subtle px-2.5 py-1.5 text-[0.8125rem] focus:border-border-strong focus:bg-bg"
+                className="w-full rounded-sm border border-transparent bg-bg-subtle px-2.5 py-1.5 text-[1.0625rem] focus:border-border-strong focus:bg-bg"
               >
                 <option value="">— 없음 —</option>
                 {seriesList.map((item) => (
@@ -498,7 +498,7 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
                   }
                   placeholder="몇 번째 글"
                   aria-label="시리즈 순서"
-                  className="mt-2 w-full rounded-sm border border-transparent bg-bg-subtle px-2.5 py-1.5 text-[0.8125rem] focus:border-border-strong focus:bg-bg"
+                  className="mt-2 w-full rounded-sm border border-transparent bg-bg-subtle px-2.5 py-1.5 text-[1.0625rem] focus:border-border-strong focus:bg-bg"
                 />
               )}
             </section>
@@ -517,13 +517,13 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
                   <button
                     type="button"
                     onClick={() => patch({ coverImageUrl: null })}
-                    className="mt-2 cursor-pointer text-[0.75rem] text-fg-faint transition-colors hover:text-fg"
+                    className="mt-2 cursor-pointer text-[1rem] text-fg-faint transition-colors hover:text-fg"
                   >
                     제거
                   </button>
                 </div>
               ) : (
-                <label className="grid min-h-[5.5rem] cursor-pointer place-items-center rounded-sm border border-border-strong border-dashed text-[0.75rem] text-fg-faint transition-colors hover:text-fg">
+                <label className="grid min-h-[5.5rem] cursor-pointer place-items-center rounded-sm border border-border-strong border-dashed text-[1rem] text-fg-faint transition-colors hover:text-fg">
                   1200 × 630 올리기
                   <input
                     type="file"
@@ -551,7 +551,7 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
                   />
                 </label>
               )}
-              <p className="mt-1.5 text-[0.625rem] text-fg-faint leading-relaxed">
+              <p className="mt-1.5 text-[0.875rem] text-fg-faint leading-relaxed">
                 비우면 제목·태그로 OG 이미지를 생성합니다
               </p>
             </section>

@@ -71,7 +71,7 @@ export default async function SeriesPage({ params }: { params: Promise<Params> }
         <h1 className="mb-2 font-[640] text-[clamp(1.5rem,3.4vw,2.125rem)] tracking-[-0.006em]">
           {series.title}
         </h1>
-        <p className="max-w-[46ch] text-[0.875rem] text-fg-muted">
+        <p className="max-w-[46ch] text-[1.125rem] text-fg-muted">
           {series.description ?? `연재 ${series.count}편.`}
         </p>
       </header>

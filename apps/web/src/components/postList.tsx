@@ -17,7 +17,7 @@ export type PostSummary = {
 export function PostList({ items, startIndex = 0 }: { items: PostSummary[]; startIndex?: number }) {
   if (items.length === 0) {
     return (
-      <p className="py-16 text-center text-[0.9375rem] text-fg-faint">아직 쓴 글이 없습니다.</p>
+      <p className="py-16 text-center text-[1.1875rem] text-fg-faint">아직 쓴 글이 없습니다.</p>
     )
   }
 
@@ -28,12 +28,12 @@ export function PostList({ items, startIndex = 0 }: { items: PostSummary[]; star
           <article className="group relative py-[1.9rem]">
             <span
               aria-hidden="true"
-              className="tabular pointer-events-none absolute top-[1.95rem] -left-11 translate-x-1.5 text-[0.8125rem] text-accent-ink opacity-0 transition-[opacity,transform] duration-200 ease-out group-focus-within:translate-x-0 group-focus-within:opacity-100 group-hover:translate-x-0 group-hover:opacity-100 max-lg:hidden"
+              className="tabular pointer-events-none absolute top-[1.95rem] -left-11 translate-x-1.5 text-[1.0625rem] text-accent-ink opacity-0 transition-[opacity,transform] duration-200 ease-out group-focus-within:translate-x-0 group-focus-within:opacity-100 group-hover:translate-x-0 group-hover:opacity-100 max-lg:hidden"
             >
               {startIndex + index + 1}
             </span>
 
-            <p className="tabular mb-2 text-[0.75rem] text-fg-faint">
+            <p className="tabular mb-2 text-[1rem] text-fg-faint">
               <time dateTime={toIsoDate(post.publishedAt)}>{formatDate(post.publishedAt)}</time>
               <span aria-hidden="true"> · </span>
               {post.readingMinutes}분
@@ -43,7 +43,7 @@ export function PostList({ items, startIndex = 0 }: { items: PostSummary[]; star
               <Link href={`/posts/${post.slug}`}>{post.title}</Link>
             </h2>
 
-            <p className="mb-3.5 line-clamp-2 max-w-[62ch] text-[0.9375rem] text-fg-muted leading-[1.7]">
+            <p className="mb-3.5 line-clamp-2 max-w-[62ch] text-[1.1875rem] text-fg-muted leading-[1.7]">
               {post.excerpt}
             </p>
 

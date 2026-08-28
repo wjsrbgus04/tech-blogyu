@@ -48,7 +48,7 @@ export default function EditPostPage() {
     return (
       <>
         <AdminBar />
-        <p className="py-24 text-center text-[0.875rem] text-fg-faint">{error}</p>
+        <p className="py-24 text-center text-[1.125rem] text-fg-faint">{error}</p>
       </>
     )
   }
@@ -57,7 +57,7 @@ export default function EditPostPage() {
     return (
       <>
         <AdminBar />
-        <p className="py-24 text-center text-[0.875rem] text-fg-faint">불러오는 중…</p>
+        <p className="py-24 text-center text-[1.125rem] text-fg-faint">불러오는 중…</p>
       </>
     )
   }

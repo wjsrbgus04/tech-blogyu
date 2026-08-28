@@ -149,7 +149,7 @@
      한국어 화면 위에 영문 대문자를 얹으면 읽는 리듬이 끊기고
      관리 콘솔처럼 보인다. 라벨도 한글로 쓰고 자간은 0. */
   .label {
-    font-size: 0.75rem;
+    font-size: 1rem;
     font-weight: 560;
     color: var(--fg-faint);
     line-height: 1.5;
@@ -432,7 +432,7 @@
 
   /* 태그 칩 */
   .chip {
-    font-size: 0.75rem;
+    font-size: 1rem;
     color: var(--fg-faint);
     padding: 0.12rem 0.5rem;
     border: 1px solid var(--border);

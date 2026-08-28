@@ -99,7 +99,7 @@ export default function AdminPostsPage() {
         <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="font-[640] text-2xl tracking-[-0.006em]">글</h1>
-            <p className="mt-1 text-[0.8125rem] text-fg-muted">최근 수정순 · 전체 {total}편</p>
+            <p className="mt-1 text-[1.0625rem] text-fg-muted">최근 수정순 · 전체 {total}편</p>
           </div>
 
           <div className="flex items-center gap-2.5">
@@ -112,13 +112,13 @@ export default function AdminPostsPage() {
                   onClick={() => setFilter(item.key)}
                   className={
                     filter === item.key
-                      ? 'cursor-pointer rounded-[4px] bg-bg px-2.5 py-1 font-[520] text-[0.75rem] text-fg shadow-sm'
-                      : 'cursor-pointer rounded-[4px] px-2.5 py-1 font-[520] text-[0.75rem] text-fg-muted transition-colors hover:text-fg'
+                      ? 'cursor-pointer rounded-[4px] bg-bg px-2.5 py-1 font-[520] text-[1rem] text-fg shadow-sm'
+                      : 'cursor-pointer rounded-[4px] px-2.5 py-1 font-[520] text-[1rem] text-fg-muted transition-colors hover:text-fg'
                   }
                 >
                   {item.label}
                   {item.key !== 'all' && counts[item.key] !== undefined && (
-                    <span className="tabular ml-1 text-[0.6875rem] opacity-60">
+                    <span className="tabular ml-1 text-[0.9375rem] opacity-60">
                       {counts[item.key]}
                     </span>
                   )}
@@ -128,7 +128,7 @@ export default function AdminPostsPage() {
 
             <Link
               href="/admin/posts/new"
-              className="rounded-sm border border-accent bg-accent px-3.5 py-2 font-[600] text-[0.8125rem] text-accent-fg transition-[filter] hover:brightness-105"
+              className="rounded-sm border border-accent bg-accent px-3.5 py-2 font-[600] text-[1.0625rem] text-accent-fg transition-[filter] hover:brightness-105"
             >
               새 글
             </Link>
@@ -136,32 +136,32 @@ export default function AdminPostsPage() {
         </div>
 
         {error && (
-          <p className="mb-4 rounded-sm border border-border bg-bg-subtle px-4 py-3 text-[0.8125rem] text-fg-muted">
+          <p className="mb-4 rounded-sm border border-border bg-bg-subtle px-4 py-3 text-[1.0625rem] text-fg-muted">
             {error}
           </p>
         )}
 
         {loading ? (
-          <p className="py-16 text-center text-[0.875rem] text-fg-faint">불러오는 중…</p>
+          <p className="py-16 text-center text-[1.125rem] text-fg-faint">불러오는 중…</p>
         ) : error ? null : rows.length === 0 ? (
-          <p className="py-16 text-center text-[0.875rem] text-fg-faint">글이 없습니다.</p>
+          <p className="py-16 text-center text-[1.125rem] text-fg-faint">글이 없습니다.</p>
         ) : (
-          <table className="w-full border-collapse text-[0.875rem]">
+          <table className="w-full border-collapse text-[1.125rem]">
             <thead>
               <tr>
-                <th className="border-border border-b px-2.5 pb-2.5 text-left font-[560] text-[0.75rem] text-fg-faint">
+                <th className="border-border border-b px-2.5 pb-2.5 text-left font-[560] text-[1rem] text-fg-faint">
                   제목
                 </th>
-                <th className="border-border border-b px-2.5 pb-2.5 text-left font-[560] text-[0.75rem] text-fg-faint">
+                <th className="border-border border-b px-2.5 pb-2.5 text-left font-[560] text-[1rem] text-fg-faint">
                   상태
                 </th>
-                <th className="border-border border-b px-2.5 pb-2.5 text-left font-[560] text-[0.75rem] text-fg-faint max-sm:hidden">
+                <th className="border-border border-b px-2.5 pb-2.5 text-left font-[560] text-[1rem] text-fg-faint max-sm:hidden">
                   발행일
                 </th>
-                <th className="border-border border-b px-2.5 pb-2.5 text-right font-[560] text-[0.75rem] text-fg-faint max-sm:hidden">
+                <th className="border-border border-b px-2.5 pb-2.5 text-right font-[560] text-[1rem] text-fg-faint max-sm:hidden">
                   조회
                 </th>
-                <th className="border-border border-b px-2.5 pb-2.5 text-right font-[560] text-[0.75rem] text-fg-faint max-sm:hidden">
+                <th className="border-border border-b px-2.5 pb-2.5 text-right font-[560] text-[1rem] text-fg-faint max-sm:hidden">
                   좋아요
                 </th>
                 <th className="border-border border-b px-2.5 pb-2.5 text-right">
@@ -179,14 +179,14 @@ export default function AdminPostsPage() {
                     >
                       {row.title}
                     </Link>
-                    <span className="mono text-[0.6875rem] text-fg-faint">/{row.slug}</span>
+                    <span className="mono text-[0.9375rem] text-fg-faint">/{row.slug}</span>
                   </td>
 
                   <td className="border-border border-b px-2.5 py-3.5 align-middle">
                     <StatusPill status={displayStatus(row)} />
                   </td>
 
-                  <td className="border-border border-b px-2.5 py-3.5 align-middle text-[0.8125rem] max-sm:hidden">
+                  <td className="border-border border-b px-2.5 py-3.5 align-middle text-[1.0625rem] max-sm:hidden">
                     {displayStatus(row) === 'scheduled' ? (
                       // 아직 안 나간 글은 언제 나가는지가 날짜보다 중요하다
                       <span className="text-accent-ink">{formatDate(row.publishedAt)} 예정</span>
@@ -206,14 +206,14 @@ export default function AdminPostsPage() {
                   <td className="whitespace-nowrap border-border border-b px-2.5 py-3.5 text-right align-middle">
                     <Link
                       href={`/admin/posts/${row.id}`}
-                      className="px-1.5 text-[0.75rem] text-fg-faint transition-colors hover:text-fg"
+                      className="px-1.5 text-[1rem] text-fg-faint transition-colors hover:text-fg"
                     >
                       편집
                     </Link>
                     {row.status === 'published' && (
                       <Link
                         href={`/posts/${row.slug}`}
-                        className="px-1.5 text-[0.75rem] text-fg-faint transition-colors hover:text-fg"
+                        className="px-1.5 text-[1rem] text-fg-faint transition-colors hover:text-fg"
                       >
                         보기
                       </Link>
@@ -224,8 +224,8 @@ export default function AdminPostsPage() {
                       onBlur={() => setConfirmingId(null)}
                       className={
                         confirmingId === row.id
-                          ? 'cursor-pointer px-1.5 font-[560] text-[0.75rem] text-accent-ink'
-                          : 'cursor-pointer px-1.5 text-[0.75rem] text-fg-faint transition-colors hover:text-fg'
+                          ? 'cursor-pointer px-1.5 font-[560] text-[1rem] text-accent-ink'
+                          : 'cursor-pointer px-1.5 text-[1rem] text-fg-faint transition-colors hover:text-fg'
                       }
                     >
                       {confirmingId === row.id ? '정말 삭제?' : '삭제'}

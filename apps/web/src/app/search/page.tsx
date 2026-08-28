@@ -48,17 +48,17 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
       </search>
 
       {query && (
-        <p className="mb-6 text-[0.8125rem] text-fg-faint">
+        <p className="mb-6 text-[1.0625rem] text-fg-faint">
           <b className="font-[560] text-fg">{query}</b> — {items.length}건
         </p>
       )}
 
       {failed ? (
-        <p className="py-16 text-center text-[0.9375rem] text-fg-faint">
+        <p className="py-16 text-center text-[1.1875rem] text-fg-faint">
           검색에 실패했습니다. 잠시 후 다시 시도해 주세요.
         </p>
       ) : query && items.length === 0 ? (
-        <p className="py-16 text-center text-[0.9375rem] text-fg-faint">
+        <p className="py-16 text-center text-[1.1875rem] text-fg-faint">
           검색 결과가 없습니다. 다른 낱말로 찾아보세요.
         </p>
       ) : (

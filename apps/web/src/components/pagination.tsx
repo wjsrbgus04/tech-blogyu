@@ -22,7 +22,7 @@ export function Pagination({
           <span
             key={target}
             aria-current="page"
-            className="tabular min-w-[1.9rem] rounded-sm border border-fg bg-fg px-2 py-1.5 text-center text-[0.8125rem] text-bg"
+            className="tabular min-w-[1.9rem] rounded-sm border border-fg bg-fg px-2 py-1.5 text-center text-[1.0625rem] text-bg"
           >
             {target}
           </span>
@@ -30,7 +30,7 @@ export function Pagination({
           <Link
             key={target}
             href={href(target)}
-            className="tabular min-w-[1.9rem] rounded-sm border border-border px-2 py-1.5 text-center text-[0.8125rem] text-fg-muted transition-colors hover:border-border-strong hover:text-fg"
+            className="tabular min-w-[1.9rem] rounded-sm border border-border px-2 py-1.5 text-center text-[1.0625rem] text-fg-muted transition-colors hover:border-border-strong hover:text-fg"
           >
             {target}
           </Link>

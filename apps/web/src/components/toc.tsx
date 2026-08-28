@@ -60,12 +60,12 @@ export function Toc({ items }: { items: TocItem[] }) {
           />
         </div>
 
-        <ol ref={listRef} className="text-[0.8125rem]">
+        <ol ref={listRef} className="text-[1.0625rem]">
           {items.map((item) => (
             <li
               key={item.id}
               className={
-                item.level === 3 ? 'ml-3 text-[0.75rem] leading-[1.35rem]' : 'leading-[1.35rem]'
+                item.level === 3 ? 'ml-3 text-[1rem] leading-[1.35rem]' : 'leading-[1.35rem]'
               }
             >
               <a
