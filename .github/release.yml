@@ -1,0 +1,31 @@
+# 릴리즈 노트 자동 생성 설정.
+# GitHub 이 "Generate release notes" 를 누를 때 PR 을 라벨로 묶어준다.
+#
+# v0.1.0 은 비교할 이전 태그가 없어 손으로 썼다. v0.2.0 부터 이 설정이 쓰인다.
+# 라벨을 안 달면 전부 "그 외" 로 떨어지니, PR 에 라벨을 붙이는 습관이 전제다.
+changelog:
+  exclude:
+    labels:
+      - duplicate
+      - invalid
+      - question
+      - wontfix
+  categories:
+    - title: ⚠️ 호환성이 깨지는 변경
+      labels:
+        - breaking
+    - title: ✨ 새 기능
+      labels:
+        - enhancement
+    - title: 🐛 버그 수정
+      labels:
+        - bug
+    - title: ♿ 접근성
+      labels:
+        - accessibility
+    - title: 📚 문서
+      labels:
+        - documentation
+    - title: 🔧 그 외
+      labels:
+        - "*"
