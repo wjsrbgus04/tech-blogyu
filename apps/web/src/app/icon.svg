@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="blogyu">
+  <title>blogyu</title>
+  <rect width="64" height="64" rx="8" fill="#0A0A0B"/>
+  <g fill="#FAFAFA">
+    <path d="M16 12h32v8H16z"/><path d="M40 12h8v20h-8z"/>
+    <path d="M8 32h48v8H8z"/>
+    <path d="M20 40h8v12h-8z"/><path d="M36 40h8v12h-8z"/>
+  </g>
+</svg>
