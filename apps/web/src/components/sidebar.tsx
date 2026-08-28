@@ -39,7 +39,9 @@ export async function Sidebar({ toc }: { toc?: ReactNode }) {
           blogyu
         </span>
         <span className="mt-2 block text-[0.8125rem] text-fg-muted leading-relaxed">
-          직접 경험한 것과 해결해본 것에 대해 씁니다. 대체로 실패한 이야기.
+          직접 경험한 것과 해결해본 것에 대해 씁니다.
+          <br />
+          대체로 실패한 이야기.
         </span>
       </Link>
 
