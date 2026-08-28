@@ -30,8 +30,8 @@
     // 비밀이 아닌 값만 여기 둔다. 시크릿은 `wrangler secret put` 으로 넣는다.
     "ADMIN_GITHUB_LOGINS": "wjsrbgus04",
     // blogyu-web 워커의 오리진. CORS 허용·OAuth 리다이렉트·재검증 웹훅에 쓴다.
-    "SITE_URL": "https://blogyu-web.jgh10070.workers.dev",
+    "SITE_URL": "https://blogyu-web.tech-blogyu.workers.dev",
     // 업로드 이미지 URL 앞부분. api 가 /media/* 로 R2 를 중계한다.
-    "MEDIA_BASE_URL": "https://blogyu-api.jgh10070.workers.dev/media"
+    "MEDIA_BASE_URL": "https://blogyu-api.tech-blogyu.workers.dev/media"
   }
 }
