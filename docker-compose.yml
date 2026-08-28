@@ -1,0 +1,42 @@
+# 로컬 개발용 DB 스택.
+#
+# 프로덕션은 Neon 을 쓰는데, Neon 드라이버는 Postgres 와이어 프로토콜이 아니라
+# HTTP 로 말한다. 그래서 일반 Postgres 에 바로 붙일 수 없다.
+# 프록시가 그 사이를 번역해 주므로 앱 코드는 배포와 똑같이 둘 수 있다.
+#
+#   pnpm db:up     # 띄우기
+#   pnpm db:down   # 내리기 (데이터 유지)
+#   pnpm db:reset  # 볼륨까지 삭제
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: blogyu-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: blogyu
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d blogyu']
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  # Neon serverless 드라이버의 HTTP 요청을 위 Postgres 로 넘긴다
+  neon-proxy:
+    image: ghcr.io/timowilhelm/local-neon-http-proxy:main
+    container_name: blogyu-neon-proxy
+    environment:
+      PG_CONNECTION_STRING: postgres://postgres:postgres@postgres:5432/blogyu
+    ports:
+      - '4444:4444'
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:

@@ -1,0 +1,8 @@
+# Cloudflare 정적 에셋 헤더.
+# 해시가 붙은 파일이라 영구 캐시해도 안전하다 — 이게 없으면 방문자가
+# 매번 JS/CSS 를 다시 받는다.
+/_next/static/*
+  Cache-Control: public,max-age=31536000,immutable
+
+/fonts/*
+  Cache-Control: public,max-age=31536000,immutable

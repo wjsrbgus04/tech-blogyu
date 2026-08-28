@@ -1,0 +1,6 @@
+# 이 파일을 .dev.vars 로 복사해 값을 채운다.
+# `pnpm preview`(로컬 워커 실행)에서만 쓰인다 — 실제 배포 값은
+# `wrangler secret put REVALIDATE_SECRET` 으로 따로 넣는다.
+
+# apps/api 의 REVALIDATE_SECRET 과 같은 값이어야 한다
+REVALIDATE_SECRET=""

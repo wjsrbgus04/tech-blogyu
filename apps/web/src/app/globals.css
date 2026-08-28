@@ -1,0 +1,454 @@
+/* ─────────────────────────────────────────────────────────────
+   blogyu — 디자인 토큰 (Tailwind v4)
+   아트디렉션: Neo-Minimal + Editorial 타입 대비
+   뉴트럴 램프 + 액센트 1색(전기 라임) / 무지 + 5% 그레인 / 마이크로 모션만
+
+   프로젝트 스캐폴딩 후 apps/web/src/app/globals.css 에 그대로 붙인다.
+   ───────────────────────────────────────────────────────────── */
+
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  /* ── 뉴트럴 램프 ──────────────────────────────────────────
+     순수 회색(hue 0) 금지. hue 265의 차가운 기운을 아주 옅게 섞어
+     라임 액센트와 보색에 가깝게 붙였다. 채도는 0.002~0.008만 준다. */
+  --n-0:   oklch(0.995 0.002 265);
+  --n-50:  oklch(0.978 0.003 265);
+  --n-100: oklch(0.950 0.004 265);
+  --n-200: oklch(0.906 0.005 265);
+  --n-300: oklch(0.838 0.006 265);
+  --n-400: oklch(0.690 0.008 265);
+  --n-500: oklch(0.572 0.009 265);
+  --n-600: oklch(0.463 0.009 265);
+  --n-700: oklch(0.362 0.008 265);
+  --n-800: oklch(0.262 0.007 265);
+  --n-900: oklch(0.183 0.006 265);
+  --n-950: oklch(0.135 0.006 265);
+
+  /* ── 액센트 ───────────────────────────────────────────────
+     전기 라임 1색. 밝기가 높아 라이트 모드에서 텍스트로 쓰면 대비가 깨진다.
+     → 면(marker/fill)에는 --accent, 글자에는 --accent-ink 로 분리한다. */
+  --accent-lime: oklch(0.885 0.205 125);
+  --accent:      var(--accent-lime);
+  --accent-ink:  oklch(0.515 0.128 128);          /* 라이트: 어두운 올리브 — 5.2:1 */
+  --accent-fg:   oklch(0.183 0.006 265);          /* 액센트 면 위 글자 */
+  --accent-weak: oklch(0.885 0.205 125 / 0.16);
+
+  /* ── 시맨틱 (라이트) ─────────────────────────────────────── */
+  --bg:            var(--n-0);
+  --bg-subtle:     var(--n-50);
+  --bg-elevated:   var(--n-0);
+  --bg-sunken:     var(--n-100);
+  --fg:            var(--n-900);
+  --fg-muted:      oklch(0.485 0.009 265);   /* 본문 — 흰 배경 대비 6.3:1 */
+  --fg-faint:      oklch(0.552 0.009 265);   /* 메타·라벨 — 4.6:1 */
+  --border:        oklch(0.183 0.006 265 / 0.10);   /* hairline 6~10% */
+  --border-strong: oklch(0.183 0.006 265 / 0.20);
+
+  /* 코드 서피스 — 본문과 구분되되 튀지 않게 */
+  --code-bg:     var(--n-50);
+  --code-border: oklch(0.183 0.006 265 / 0.08);
+  --code-kw:     var(--accent-ink);
+  --code-str:    var(--n-600);
+  --code-com:    oklch(0.545 0.008 265);
+
+  /* 그림자 — 한 겹으로 키우지 말고 2겹으로 쌓는다 */
+  --shadow-sm: 0 1px 1px oklch(0.183 0.006 265 / 0.04),
+               0 2px 6px oklch(0.183 0.006 265 / 0.05);
+  --shadow-md: 0 1px 1px oklch(0.183 0.006 265 / 0.05),
+               0 8px 24px oklch(0.183 0.006 265 / 0.08);
+
+  /* radius — 3단. 전부 같은 값 금지 */
+  --radius-sm: 0.3125rem;   /* 입력, 뱃지 */
+  --radius-md: 0.625rem;    /* 카드, 패널 */
+  --radius-full: 999px;     /* pill */
+
+  /* 모션 — Neo-Minimal: 0.15~0.25s 마이크로 인터랙션만 */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-instant: 0.1s;
+  --dur-fast: 0.16s;
+  --dur-base: 0.22s;
+
+  /* 레이아웃 */
+  --sidebar-w: 15.5rem;
+  --measure: 68ch;          /* 본문 줄길이 상한 */
+}
+
+.dark {
+  /* #000 금지 — 0.13 대역. 텍스트도 순백 금지 */
+  --bg:            var(--n-950);
+  --bg-subtle:     oklch(0.163 0.006 265);
+  --bg-elevated:   oklch(0.196 0.006 265);
+  --bg-sunken:     oklch(0.118 0.006 265);
+  --fg:            var(--n-100);
+  --fg-muted:      var(--n-400);
+  --fg-faint:      var(--n-500);
+  --border:        oklch(0.99 0 0 / 0.10);
+  --border-strong: oklch(0.99 0 0 / 0.19);
+
+  /* 다크에서는 라임이 그대로 읽힌다 — ink를 면 색과 통일 */
+  --accent-ink:  var(--accent-lime);
+  --accent-weak: oklch(0.885 0.205 125 / 0.14);
+
+  --code-bg:     oklch(0.163 0.006 265);
+  --code-border: oklch(0.99 0 0 / 0.07);
+  --code-kw:     var(--accent-lime);
+  --code-str:    var(--n-300);
+  --code-com:    oklch(0.625 0.009 265);
+
+  --shadow-sm: 0 1px 1px oklch(0 0 0 / 0.30), 0 2px 6px oklch(0 0 0 / 0.35);
+  --shadow-md: 0 1px 1px oklch(0 0 0 / 0.35), 0 8px 24px oklch(0 0 0 / 0.45);
+}
+
+/* @theme inline: var() 참조를 유지해야 .dark 전환이 런타임에 먹는다.
+   값을 직접 쓰면 빌드 타임에 복사돼 테마 전환이 죽는다. */
+@theme inline {
+  --color-bg:          var(--bg);
+  --color-bg-subtle:   var(--bg-subtle);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-bg-sunken:   var(--bg-sunken);
+  --color-fg:          var(--fg);
+  --color-fg-muted:    var(--fg-muted);
+  --color-fg-faint:    var(--fg-faint);
+  --color-border:      var(--border);
+  --color-accent:      var(--accent);
+  --color-accent-ink:  var(--accent-ink);
+  --color-accent-fg:   var(--accent-fg);
+
+  /* next/font/local 이 만든 변수. 폴백은 fonts.ts 의 fallback 배열이 채운다. */
+  --font-sans: var(--font-pretendard), -apple-system, BlinkMacSystemFont,
+               "Apple SD Gothic Neo", "Segoe UI", system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --radius-sm: 0.3125rem;
+  --radius-md: 0.625rem;
+}
+
+/* var(--color-*)로만 참조하는 토큰은 @theme static.
+   비-static에 두면 미사용으로 판정돼 출력에서 pruning된다. */
+@theme static {
+  --color-border-strong: var(--border-strong);
+  --color-accent-weak:   var(--accent-weak);
+}
+
+@layer base {
+  /* 타입 스케일 1.25 — 정보 밀도가 있는 읽기 UI 기준.
+     본문 17px ↔ 글 제목 56px 로 3.3배 점프. 한글 제목은 이 이상 키우면
+     줄바꿈이 무너져서 랜딩용 4배 점프는 의도적으로 쓰지 않았다. */
+  .text-display { font-size: clamp(2.25rem, 5vw, 3.5rem); line-height: 1.26; letter-spacing: -0.008em; }
+  .text-h1      { font-size: clamp(1.75rem, 3.4vw, 2.375rem); line-height: 1.3;  letter-spacing: -0.006em; }
+  .text-h2      { font-size: 1.375rem; line-height: 1.42; letter-spacing: -0.006em; }
+
+  /* 라틴 전용 문자열(브랜드·태그명)만 이 클래스로 더 조인다.
+     한글이 섞이면 글리프가 뭉개지므로 절대 본문에 쓰지 말 것. */
+  .text-latin { letter-spacing: -0.022em; }
+
+  /* 섹션 라벨 — 대문자 모노 라벨은 쓰지 않는다.
+     한국어 화면 위에 영문 대문자를 얹으면 읽는 리듬이 끊기고
+     관리 콘솔처럼 보인다. 라벨도 한글로 쓰고 자간은 0. */
+  .label {
+    font-size: 0.75rem;
+    font-weight: 560;
+    color: var(--fg-faint);
+    line-height: 1.5;
+  }
+
+  /* 한글: line-height 1.375 하한, 어절 단위 줄바꿈 */
+  :lang(ko) h1, :lang(ko) h2, :lang(ko) h3 {
+    word-break: keep-all;
+    text-wrap: balance;
+  }
+  :lang(ko) p, :lang(ko) li {
+    line-height: 1.75;
+    word-break: keep-all;
+    text-wrap: pretty;
+  }
+
+  /* 숫자 — 목록·표·카운트는 폭을 고정해야 세로줄이 흔들리지 않는다.
+     제로패딩(01, 02)은 쓰지 않는다. 코드처럼 보이는 게 목적이 아니다. */
+  .tabular { font-variant-numeric: tabular-nums; }
+
+  /* 모노스페이스는 코드에만 — 코드 블록, 인라인 코드, 슬러그·경로, 키캡.
+     날짜·카운트·태그·라벨에 모노를 쓰면 화면이 개발자 대시보드가 된다. */
+  .mono { font-family: var(--font-mono); }
+}
+
+/* 필름 그레인 — opacity가 눈에 띄면 실패. 0.03~0.08 대역을 지킨다 */
+@layer utilities {
+  .grain { position: relative; isolation: isolate; }
+  .grain::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .dark .grain::after { opacity: 0.065; mix-blend-mode: normal; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   베이스
+   ═══════════════════════════════════════════════════════════ */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: 1.0625rem; /* 17px — 한글 본문 */
+    line-height: 1.75;
+    font-feature-settings: 'ss01';
+    -webkit-font-smoothing: antialiased;
+    overflow-wrap: break-word;
+    /* 테마 전환에는 transition을 걸지 않는다. 다크↔라이트를 보간하면
+       중간에 탁한 회색을 거쳐 오히려 지저분하다. */
+  }
+
+  /* 배경 텍스처 — transparenttextures 의 grid-noise, 98x98 타일.
+     촘촘한 격자결이라 반복이 눈에 띄지 않고 결만 남는다.
+     X자 격자(elastoplast)나 45도 브러시(brushed-alum)는 패턴이 스스로
+     주장해서 읽는 화면에 맞지 않았다. 눈에 띄면 실패다. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    /* 콘텐츠 아래에 깐다. 필름 그레인은 전체를 덮는 게 맞지만
+       격자 패턴이 글자 위에 얹히면 가독성을 갉아먹는다. */
+    z-index: -1;
+    pointer-events: none;
+    background-image: url('/textures/grid-noise.png');
+    background-repeat: repeat;
+    /* 패턴이 흰색이라 밝은 배경에서는 곱하기로 눌러야 결이 드러난다 */
+    mix-blend-mode: multiply;
+    opacity: 0.22;
+  }
+  .dark body::before {
+    /* 격자선이 어두운 색이라 다크에서는 라이트보다 진하게 올려야 결이 보인다 */
+    mix-blend-mode: normal;
+    opacity: 0.14;
+  }
+
+  h1, h2, h3, h4 {
+    font-weight: 640;
+    letter-spacing: -0.006em;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* 테마 전환 순간에만 붙는다. 색 보간으로 생기는 깜빡임을 막는다. */
+  .theme-switching,
+  .theme-switching *,
+  .theme-switching *::before,
+  .theme-switching *::after {
+    transition: none !important;
+  }
+
+  /* ── 포커스 ────────────────────────────────────────────────
+     기본 outline 은 요소에서 떨어져 뜨는 색 띠라, 테두리가 이미 있는
+     입력창에서는 이중 테두리로 보인다. 요소에 붙는 표시로 바꾼다.
+
+     접근성상 포커스 표시는 없앨 수 없다(WCAG 2.4.7). 대비 3:1 을
+     만족하도록 액센트를 그대로 쓰되 두께와 붙는 위치만 손봤다. */
+
+  /* 누르는 것들 — 배경색 갭을 한 겹 두고 링이 퍼져 나온다 */
+  :is(a, button, summary, [tabindex]):focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px var(--bg),
+      0 0 0 3px var(--accent);
+    border-radius: var(--radius-sm);
+  }
+
+  /* 입력하는 것들 — 밑줄이 왼쪽에서 오른쪽으로 그어진다.
+     background-image 로 그리면 래퍼 엘리먼트 없이 input 하나로 끝난다. */
+  :is(input:not([type='checkbox']):not([type='radio']), textarea, select) {
+    background-image: linear-gradient(var(--accent), var(--accent));
+    background-repeat: no-repeat;
+    background-position: left bottom;
+    background-size: 0% 1.5px;
+    transition:
+      background-size var(--dur-base) var(--ease-out),
+      border-color var(--dur-fast) var(--ease-out),
+      background-color var(--dur-fast) var(--ease-out);
+  }
+
+  :is(input:not([type='checkbox']):not([type='radio']), textarea, select):focus {
+    outline: none;
+    background-size: 100% 1.5px;
+    border-color: var(--border-strong);
+  }
+
+  /* 이미 border-bottom 을 밑줄로 쓰는 요소는 라인이 두 겹이 된다 */
+  .no-focus-underline {
+    background-image: none;
+  }
+
+  /* 체크박스·라디오는 모양이 작아 밑줄이 안 보인다 — 링으로 간다 */
+  :is(input[type='checkbox'], input[type='radio']):focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px var(--bg),
+      0 0 0 3px var(--accent);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   본문 타이포 — 마크다운이 렌더된 결과에 걸린다
+   ═══════════════════════════════════════════════════════════ */
+@layer components {
+  .prose > * + * {
+    margin-top: 1.4rem;
+  }
+  .prose h2 {
+    font-size: 1.375rem;
+    margin-top: 3.25rem;
+    padding-top: 0.5rem;
+    scroll-margin-top: 2rem;
+  }
+  .prose h3 {
+    font-size: 1.0625rem;
+    margin-top: 2.25rem;
+    scroll-margin-top: 2rem;
+  }
+  .prose p,
+  .prose ul,
+  .prose ol {
+    color: var(--fg-muted);
+  }
+  .prose strong {
+    color: var(--fg);
+    font-weight: 620;
+  }
+  .prose ul,
+  .prose ol {
+    padding-left: 1.15rem;
+  }
+  .prose li + li {
+    margin-top: 0.4rem;
+  }
+  .prose li::marker {
+    color: var(--fg-faint);
+  }
+
+  .prose a {
+    color: var(--fg);
+    border-bottom: 1px solid var(--accent);
+    padding-bottom: 1px;
+    transition: background-color var(--dur-fast) var(--ease-out);
+  }
+  .prose a:hover {
+    background: var(--accent-weak);
+  }
+
+  .prose blockquote {
+    margin: 2rem 0;
+    padding-left: 1.25rem;
+    border-left: 2px solid var(--accent);
+    color: var(--fg);
+  }
+  .prose blockquote p {
+    color: var(--fg);
+  }
+
+  /* Shiki 가 pre 에 인라인 배경색을 넣으므로 !important 로 덮는다 */
+  .prose pre {
+    background: var(--code-bg) !important;
+    border: 1px solid var(--code-border);
+    border-radius: var(--radius-md);
+    padding: 1.05rem 1.15rem;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.7;
+    margin: 1.6rem 0;
+  }
+  /* Shiki 는 토큰마다 --shiki-light/--shiki-dark 변수만 심는다.
+     이 두 규칙이 없으면 코드가 통째로 단색이 된다. */
+  .prose pre,
+  .prose pre span {
+    color: var(--shiki-light);
+  }
+  .dark .prose pre,
+  .dark .prose pre span {
+    color: var(--shiki-dark);
+  }
+
+  .prose :not(pre) > code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.08em 0.34em;
+    color: var(--fg);
+  }
+
+  .prose table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.875rem;
+    margin: 1.6rem 0;
+  }
+  .prose th,
+  .prose td {
+    text-align: left;
+    padding: 0.6rem 0.7rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .prose th {
+    font-size: 0.8125rem;
+    color: var(--fg-faint);
+    font-weight: 560;
+  }
+  .prose td {
+    color: var(--fg-muted);
+  }
+
+  .prose img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+  }
+
+  /* 태그 칩 */
+  .chip {
+    font-size: 0.75rem;
+    color: var(--fg-faint);
+    padding: 0.12rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    display: inline-block;
+    transition:
+      color var(--dur-fast) var(--ease-out),
+      border-color var(--dur-fast) var(--ease-out);
+  }
+  .chip:hover {
+    color: var(--fg);
+    border-color: var(--border-strong);
+  }
+  .chip[data-active='true'] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-fg);
+  }
+}

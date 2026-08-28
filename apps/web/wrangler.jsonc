@@ -1,0 +1,57 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "blogyu-web",
+  // 이 파일이 아니라 `pnpm run deploy` 로 배포한다 —
+  // opennextjs-cloudflare 가 .open-next/ 를 만든 뒤 wrangler 를 부른다.
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-08-01",
+  // nodejs_compat: Next.js 서버가 node:* 모듈을 참조한다
+  // global_fetch_strictly_public: 서버 컴포넌트가 자기 자신을 fetch 할 때
+  //   워커 내부로 새지 않고 공개 URL 로 나가게 한다 (Next 15+ 필수)
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "observability": {
+    "enabled": true
+  },
+  // 정적 파일(_next/static, 폰트, 이미지). 워커 번들 크기에 포함되지 않는다 —
+  // 무료 플랜의 3MiB(gzip) 제한을 지키는 핵심이다.
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  // 재검증 큐가 페이지를 다시 그리려면 자기 자신을 호출해야 한다.
+  // service 이름은 위 name 과 반드시 같아야 한다.
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "blogyu-web"
+    }
+  ],
+  // ISR 렌더링 결과 저장소. 배포 전에 버킷을 먼저 만들어야 한다
+  // (README "Cloudflare 리소스 만들기").
+  "r2_buckets": [
+    {
+      "binding": "NEXT_INC_CACHE_R2_BUCKET",
+      "bucket_name": "blogyu-web-cache"
+    }
+  ],
+  // 재검증 큐 + 태그 캐시. 아래 migrations 가 배포 시 자동으로 만든다.
+  "durable_objects": {
+    "bindings": [
+      { "name": "NEXT_CACHE_DO_QUEUE", "class_name": "DOQueueHandler" },
+      { "name": "NEXT_TAG_CACHE_DO_SHARDED", "class_name": "DOShardedTagCache" }
+    ]
+  },
+  // new_sqlite_classes 여야 무료 플랜에서 동작한다. new_classes 로 바꾸면
+  // 키-값 백엔드가 되어 유료 플랜을 요구한다.
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["DOQueueHandler", "DOShardedTagCache"]
+    }
+  ],
+  // next/image 최적화. 이 바인딩이 없으면 /_next/image 가 500 을 낸다.
+  // 무료 한도는 월 5,000회(같은 변형은 캐시되어 1회로 친다).
+  "images": {
+    "binding": "IMAGES"
+  }
+}

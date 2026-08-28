@@ -1,0 +1,12 @@
+# wrangler dev 가 읽는 로컬 시크릿. 이 파일을 .dev.vars 로 복사해 값을 채운다.
+# .dev.vars 는 .gitignore 에 있다.
+
+DATABASE_URL="postgresql://user:password@ep-xxx.ap-southeast-1.aws.neon.tech/blogyu?sslmode=require"
+GITHUB_CLIENT_ID=""
+GITHUB_CLIENT_SECRET=""
+AUTH_SECRET="openssl rand -base64 32 로 생성"
+REVALIDATE_SECRET="openssl rand -base64 32 로 생성"
+
+# wrangler.jsonc 의 vars 는 배포 기준(https)이라, 로컬에서는 여기서 덮어쓴다.
+SITE_URL="http://localhost:3000"
+MEDIA_BASE_URL="http://localhost:8787/media"
