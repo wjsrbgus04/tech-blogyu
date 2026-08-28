@@ -1,4 +1,4 @@
-import rehypeShiki from '@shikijs/rehype'
+import rehypeShikiFromHighlighter from '@shikijs/rehype/core'
 import type { Root } from 'hast'
 import { toString as hastToString } from 'hast-util-to-string'
 import rehypeSlug from 'rehype-slug'
@@ -6,6 +6,21 @@ import rehypeStringify from 'rehype-stringify'
 import remarkGfm from 'remark-gfm'
 import remarkParse from 'remark-parse'
 import remarkRehype from 'remark-rehype'
+import { createHighlighterCore } from 'shiki/core'
+import { createJavaScriptRegexEngine } from 'shiki/engine/javascript'
+import bash from 'shiki/langs/bash.mjs'
+import css from 'shiki/langs/css.mjs'
+import diff from 'shiki/langs/diff.mjs'
+import html from 'shiki/langs/html.mjs'
+import javascript from 'shiki/langs/javascript.mjs'
+import json from 'shiki/langs/json.mjs'
+import jsonc from 'shiki/langs/jsonc.mjs'
+import markdownLang from 'shiki/langs/markdown.mjs'
+import sql from 'shiki/langs/sql.mjs'
+import toml from 'shiki/langs/toml.mjs'
+import tsx from 'shiki/langs/tsx.mjs'
+import typescript from 'shiki/langs/typescript.mjs'
+import yaml from 'shiki/langs/yaml.mjs'
 import { unified } from 'unified'
 import { visit } from 'unist-util-visit'
 import { codeThemeDark, codeThemeLight } from './codeTheme'
@@ -42,10 +57,48 @@ function collectHeadings(sink: TocItem[]) {
  * 이 규칙이 없으면 변수만 심기고 코드가 전부 단색으로 나온다.
  */
 const shikiOptions = {
-  themes: { light: codeThemeLight, dark: codeThemeDark },
+  themes: { light: codeThemeLight.name, dark: codeThemeDark.name },
   // false 로 좁혀둔다 — boolean 으로 넓어지면 rehype-shiki 옵션 타입과 안 맞는다
   defaultColor: false as const,
   cssVariablePrefix: '--shiki-',
+}
+
+/**
+ * 하이라이터를 직접 조립한다. `@shikijs/rehype` 를 그냥 쓰면 언어 문법
+ * 261개와 테마 65개가 통째로 번들에 들어가고, 그것만으로 Workers 무료 플랜의
+ * 3MiB(gzip) 한도를 넘긴다. 그래서 이 블로그가 쓰는 언어만 싣는다.
+ * (next.config.ts 의 transpilePackages 와 짝이다 — 둘 중 하나만 빠져도 소용없다.)
+ *
+ * 목록에 없는 언어로 코드펜스를 열면 하이라이팅 없이 평문으로 나온다.
+ * 새 언어가 필요하면 위에 import 를 추가하고 여기 배열에 넣는다.
+ */
+const languages = [
+  typescript,
+  tsx,
+  javascript,
+  json,
+  jsonc,
+  sql,
+  yaml,
+  bash,
+  css,
+  html,
+  diff,
+  markdownLang,
+  toml,
+]
+
+let highlighter: ReturnType<typeof createHighlighterCore> | null = null
+
+/** 문법 로딩이 비싸므로 한 번만 만들어 재사용한다. */
+function getHighlighter() {
+  highlighter ??= createHighlighterCore({
+    themes: [codeThemeLight, codeThemeDark],
+    langs: languages,
+    // JS 정규식 엔진을 쓰면 oniguruma 의 onig.wasm(466KB)을 싣지 않아도 된다.
+    engine: createJavaScriptRegexEngine(),
+  })
+  return highlighter
 }
 
 export async function renderMarkdown(markdown: string): Promise<{
@@ -60,7 +113,14 @@ export async function renderMarkdown(markdown: string): Promise<{
     .use(remarkRehype)
     .use(rehypeSlug)
     .use(collectHeadings(toc))
-    .use(rehypeShiki, shikiOptions)
+    // createHighlighterCore 의 반환 타입(HighlighterCore)과 플러그인이 받는
+    // HighlighterGeneric<any, any> 는 shiki 쪽 제네릭 변성 때문에 서로 안 맞는다.
+    // 런타임 형태는 같으므로 플러그인이 선언한 타입으로 맞춰준다.
+    .use(
+      rehypeShikiFromHighlighter,
+      (await getHighlighter()) as Parameters<typeof rehypeShikiFromHighlighter>[0],
+      shikiOptions,
+    )
     .use(rehypeStringify)
     .process(markdown)
 

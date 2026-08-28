@@ -1,0 +1,46 @@
+name: Deploy Web
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/web/**'
+      # web 은 api 의 타입을 가져다 쓰므로 api 스키마가 바뀌면 같이 빌드한다
+      - 'apps/api/src/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/deploy-web.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-web
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm --filter @blogyu/web typecheck
+
+      # opennextjs-cloudflare 가 next build → 워커 번들 → R2 캐시 업로드 →
+      # wrangler deploy 를 순서대로 돌린다.
+      #
+      # NEXT_PUBLIC_* 는 빌드 시점에 코드로 박히므로 apps/web/.env.production 이
+      # 값을 정한다. 런타임 시크릿(REVALIDATE_SECRET)은 여기가 아니라
+      # `wrangler secret put` 으로 워커에 직접 넣는다.
+      - name: Deploy to Cloudflare Workers
+        run: pnpm --filter @blogyu/web run deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

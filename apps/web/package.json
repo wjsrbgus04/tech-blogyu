@@ -7,6 +7,8 @@
     "dev": "next dev --turbopack --port 3000",
     "build": "next build",
     "start": "next start",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview -- --port 8788",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests"
   },
@@ -29,6 +31,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260827.1",
+    "@opennextjs/cloudflare": "^1.20.4",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/hast": "^3.0.4",
     "@types/node": "^26.4.0",
@@ -36,6 +39,7 @@
     "@types/react-dom": "^19.2.5",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.11",
+    "wrangler": "^4.127.0"
   }
 }

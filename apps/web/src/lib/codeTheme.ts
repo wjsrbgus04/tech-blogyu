@@ -20,7 +20,11 @@ type Palette = {
   punctuation: string
 }
 
-function build(name: string, type: 'light' | 'dark', c: Palette): ThemeRegistrationRaw {
+function build(
+  name: string,
+  type: 'light' | 'dark',
+  c: Palette,
+): ThemeRegistrationRaw & { name: string } {
   return {
     name,
     type,
