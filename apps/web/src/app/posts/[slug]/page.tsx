@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Comments } from '@/components/comments'
+import { JsonLd } from '@/components/jsonLd'
 import { LoadError } from '@/components/loadError'
 import { RelativeTime } from '@/components/relativeTime'
 import { Shell } from '@/components/shell'
@@ -11,8 +12,10 @@ import { Toc } from '@/components/toc'
 import { ViewCounter } from '@/components/viewCounter'
 import { api, cached, SITE_URL } from '@/lib/apiClient'
 import { formatDate, toIsoDate } from '@/lib/date'
+import { blogPostingLd, breadcrumbLd } from '@/lib/jsonLd'
 import { loadOrFail } from '@/lib/loadResult'
 import { renderMarkdown } from '@/lib/markdown'
+import { markdownUrl, postImageUrl, SITE_LOCALE, SITE_NAME, siteAlternates } from '@/lib/seo'
 
 // Next 의 segment config 는 정적 리터럴만 인식한다 (apiClient 의 REVALIDATE_SECONDS 와 같은 값)
 export const revalidate = 300
@@ -55,9 +58,16 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     title: post.title,
     description: post.excerpt,
     keywords: tags,
-    alternates: { canonical: url },
+    // 마크다운 원문 주소를 함께 알린다 — AI 크롤러가 렌더된 HTML 대신 이걸 읽는다
+    alternates: siteAlternates(`/posts/${post.slug}`, {
+      'text/markdown': [{ url: markdownUrl(post.slug), title: post.title }],
+    }),
     openGraph: {
       type: 'article',
+      // siteName·locale 은 루트에서 상속되지 않는다 — openGraph 를 정의하는 순간
+      // 루트의 openGraph 가 통째로 교체되기 때문이다
+      siteName: SITE_NAME,
+      locale: SITE_LOCALE,
       title: post.title,
       description: post.excerpt,
       url,
@@ -88,28 +98,31 @@ export default async function PostPage({ params }: { params: Promise<Params> }) 
     )
   }
 
-  const { post, tags, series } = result.data
+  const { post, tags, series, prev, next } = result.data
   const { html, toc } = await renderMarkdown(post.content)
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    headline: post.title,
-    description: post.excerpt,
-    datePublished: toIsoDate(post.publishedAt),
-    dateModified: toIsoDate(post.updatedAt),
-    author: { '@type': 'Person', name: 'blogyu' },
-    mainEntityOfPage: `${SITE_URL}/posts/${post.slug}`,
-    keywords: tags.join(', '),
-  }
+  const jsonLd = [
+    blogPostingLd({
+      slug: post.slug,
+      title: post.title,
+      excerpt: post.excerpt,
+      content: post.content,
+      coverImageUrl: post.coverImageUrl,
+      publishedAt: toIsoDate(post.publishedAt),
+      updatedAt: toIsoDate(post.updatedAt),
+      tags,
+      imageUrl: postImageUrl(post.slug, post.coverImageUrl),
+    }),
+    breadcrumbLd([
+      { name: '홈', path: '/' },
+      ...(series ? [{ name: series.title, path: `/series/${series.slug}` }] : []),
+      { name: post.title, path: `/posts/${post.slug}` },
+    ]),
+  ]
 
   return (
     <Shell sidebar={<Sidebar toc={<Toc items={toc} />} />}>
-      <script
-        type="application/ld+json"
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD 구조화 데이터
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd data={jsonLd} />
 
       <article className="max-w-[44rem]">
         <header className="mb-11 border-border border-b pb-8">
@@ -181,6 +194,34 @@ export default async function PostPage({ params }: { params: Promise<Params> }) 
         )}
 
         <ViewCounter slug={post.slug} />
+
+        {/* 크롤러가 글에서 글로 넘어갈 길을 만든다. 사이트맵만으로는 문맥이 안 붙는다. */}
+        {(prev || next) && (
+          <nav aria-label="다른 글" className="mt-12 flex gap-3 max-sm:flex-col">
+            {prev && (
+              <Link
+                href={`/posts/${prev.slug}`}
+                className="group flex-1 rounded-md border border-border px-4 py-3 transition-colors hover:border-border-strong"
+              >
+                <span className="label mb-1.5 block">이전 글</span>
+                <span className="block text-[0.875rem] text-fg-muted leading-snug transition-colors group-hover:text-fg">
+                  {prev.title}
+                </span>
+              </Link>
+            )}
+            {next && (
+              <Link
+                href={`/posts/${next.slug}`}
+                className="group flex-1 rounded-md border border-border px-4 py-3 text-right transition-colors max-sm:text-left hover:border-border-strong"
+              >
+                <span className="label mb-1.5 block">다음 글</span>
+                <span className="block text-[0.875rem] text-fg-muted leading-snug transition-colors group-hover:text-fg">
+                  {next.title}
+                </span>
+              </Link>
+            )}
+          </nav>
+        )}
 
         <section aria-label="댓글" className="mt-16 border-border border-t pt-8">
           <h2 className="mb-5 text-[0.9375rem]">댓글</h2>

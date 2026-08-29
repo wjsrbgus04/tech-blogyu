@@ -66,6 +66,8 @@ export const postsRoute = new Hono<Env>()
           excerpt: posts.excerpt,
           coverImageUrl: posts.coverImageUrl,
           publishedAt: posts.publishedAt,
+          // 사이트맵의 lastmod 가 쓴다 — 발행일만으로는 글을 고쳐도 재크롤 신호가 안 간다
+          updatedAt: posts.updatedAt,
           readingMinutes: posts.readingMinutes,
           id: posts.id,
         })

@@ -1,11 +1,14 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { JsonLd } from '@/components/jsonLd'
 import { LoadError } from '@/components/loadError'
 import { PostList, type PostSummary } from '@/components/postList'
 import { Shell } from '@/components/shell'
 import { Sidebar } from '@/components/sidebar'
 import { api, cached } from '@/lib/apiClient'
+import { breadcrumbLd, collectionPageLd } from '@/lib/jsonLd'
 import { loadOrFail } from '@/lib/loadResult'
+import { siteAlternates } from '@/lib/seo'
 
 // Next 의 segment config 는 정적 리터럴만 인식한다 (apiClient 의 REVALIDATE_SECONDS 와 같은 값)
 export const revalidate = 300
@@ -39,7 +42,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   return {
     title: series.title,
     description,
-    alternates: { canonical: `/series/${series.slug}` },
+    alternates: siteAlternates(`/series/${series.slug}`),
   }
 }
 
@@ -66,6 +69,22 @@ export default async function SeriesPage({ params }: { params: Promise<Params> }
 
   return (
     <Shell sidebar={<Sidebar />}>
+      <JsonLd
+        data={[
+          collectionPageLd({
+            name: series.title,
+            description: series.description ?? `${series.title} 연재 ${series.count}편.`,
+            path: `/series/${series.slug}`,
+            items: posts,
+          }),
+          breadcrumbLd([
+            { name: '홈', path: '/' },
+            { name: '시리즈', path: '/series' },
+            { name: series.title, path: `/series/${series.slug}` },
+          ]),
+        ]}
+      />
+
       <header className="mb-1 border-border border-b pb-6">
         <span className="label mb-2 block">시리즈</span>
         <h1 className="mb-2 font-[640] text-[clamp(1.5rem,3.4vw,2.125rem)] tracking-[-0.006em]">
