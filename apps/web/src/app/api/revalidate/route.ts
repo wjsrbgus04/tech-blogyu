@@ -1,4 +1,5 @@
 import { revalidatePath, revalidateTag } from 'next/cache'
+import { pingIndexNow } from '@/lib/indexNow'
 
 /**
  * 어드민에서 글을 저장하면 API 가 이 엔드포인트를 호출한다.
@@ -35,6 +36,10 @@ export async function POST(request: Request) {
   // 태그로 비우면 경로를 일일이 나열하지 않아도 관련 fetch 캐시가 함께 날아간다.
   // Next 16 부터 만료 시점을 명시해야 한다 — expire: 0 은 지금 당장 버리라는 뜻이다.
   for (const tag of tags as string[]) revalidateTag(tag, { expire: 0 })
+
+  // 캐시를 비운 김에 검색엔진에도 알린다. 호출부(API)가 waitUntil 로 감싸 두어
+  // 여기서 기다려도 글 저장이 늦어지지 않는다.
+  await pingIndexNow(paths as string[])
 
   return Response.json({ revalidated: { paths, tags } })
 }
