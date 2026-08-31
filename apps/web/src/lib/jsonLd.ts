@@ -4,6 +4,15 @@ import { AUTHOR, SITE_DESCRIPTION, SITE_LANGUAGE, SITE_NAME } from '@/lib/seo'
 export type JsonLd = Record<string, unknown>
 
 /**
+ * 경로를 절대 주소로 만든다. 한글·공백이 든 태그 경로는 그대로 두면 유효한
+ * URL 이 아니다 — Next 가 canonical 을 만들 때와 같은 방식(new URL)으로
+ * 퍼센트 인코딩해서 두 값이 문자 그대로 일치하게 한다.
+ */
+function absoluteUrl(path: string): string {
+  return new URL(path, SITE_URL).href
+}
+
+/**
  * 글쓴이 노드. author 와 publisher 가 같은 @id 를 쓰게 해서 문서마다
  * 사람이 새로 생기지 않게 한다 — 검색엔진이 하나의 엔티티로 합쳐 본다.
  */
@@ -80,7 +89,7 @@ export function collectionPageLd(input: {
     '@type': 'CollectionPage',
     name: input.name,
     description: input.description,
-    url: `${SITE_URL}${input.path}`,
+    url: absoluteUrl(input.path),
     inLanguage: SITE_LANGUAGE,
     isPartOf: { '@id': `${SITE_URL}/#website` },
     mainEntity: {
@@ -105,7 +114,7 @@ export function breadcrumbLd(trail: { name: string; path: string }[]): JsonLd {
       '@type': 'ListItem',
       position: index + 1,
       name: crumb.name,
-      item: `${SITE_URL}${crumb.path}`,
+      item: absoluteUrl(crumb.path),
     })),
   }
 }

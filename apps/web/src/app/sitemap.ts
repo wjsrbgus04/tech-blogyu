@@ -46,8 +46,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     if (tagsRes.ok) {
       for (const tag of (await tagsRes.json()).items) {
         entries.push({
-          // 한글 태그가 그대로 들어가면 <loc> 가 사이트맵 스펙에 어긋난다
-          url: `${SITE_URL}/tags/${encodeURIComponent(tag.name)}`,
+          // 한글 태그가 그대로 들어가면 <loc> 가 사이트맵 스펙에 어긋난다.
+          // canonical 과 같은 방식(new URL)으로 인코딩한다 — encodeURIComponent 는
+          // + 같은 문자를 다르게 바꿔 사이트맵 주소가 canonical 과 어긋난다.
+          url: new URL(`/tags/${tag.name}`, SITE_URL).href,
           changeFrequency: 'weekly',
           priority: 0.4,
         })
