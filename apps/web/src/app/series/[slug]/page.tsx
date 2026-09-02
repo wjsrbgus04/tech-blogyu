@@ -1,9 +1,8 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { LoadError } from '@/components/loadError'
-import { PostList, type PostSummary } from '@/components/postList'
+import { PostGrid, type PostSummary } from '@/components/postGrid'
 import { Shell } from '@/components/shell'
-import { Sidebar } from '@/components/sidebar'
 import { api, cached } from '@/lib/apiClient'
 import { loadOrFail } from '@/lib/loadResult'
 
@@ -49,7 +48,7 @@ export default async function SeriesPage({ params }: { params: Promise<Params> }
   if (!result.ok && result.reason === 'notFound') notFound()
   if (!result.ok) {
     return (
-      <Shell sidebar={<Sidebar />}>
+      <Shell>
         <LoadError label="시리즈" />
       </Shell>
     )
@@ -65,18 +64,16 @@ export default async function SeriesPage({ params }: { params: Promise<Params> }
   }
 
   return (
-    <Shell sidebar={<Sidebar />}>
-      <header className="mb-1 border-border border-b pb-6">
-        <span className="label mb-2 block">시리즈</span>
-        <h1 className="mb-2 font-[640] text-[clamp(1.5rem,3.4vw,2.125rem)] tracking-[-0.006em]">
-          {series.title}
-        </h1>
-        <p className="max-w-[46ch] text-[0.875rem] text-fg-muted">
+    <Shell>
+      <header className="mb-12">
+        <span className="label mb-3 block">시리즈</span>
+        <h1 className="mb-4 text-display font-semibold">{series.title}</h1>
+        <p className="max-w-[46ch] text-body-lg">
           {series.description ?? `연재 ${series.count}편.`}
         </p>
       </header>
 
-      <PostList items={posts} />
+      <PostGrid items={posts} />
     </Shell>
   )
 }
