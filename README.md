@@ -4,26 +4,40 @@
   <img src="docs/assets/banner-light.png" alt="blogyu">
 </picture>
 
-<p align="center">
+<div align="center">
   직접 만들어 직접 운영하는 기술 블로그.<br/>
   Next.js 와 Hono 를 Cloudflare Workers 위에 올리고, 전부 무료 티어로 굴린다.
-</p>
+</div>
 
-<p align="center">
-  <a href="https://blogyu-web.tech-blogyu.workers.dev"><img src="https://img.shields.io/badge/🌐-사이트%20보기-111215?style=flat-square" alt="사이트"></a>
-  <a href="./docs/development.md"><img src="https://img.shields.io/badge/🛠-개발%20환경-3b6fb5?style=flat-square" alt="개발 환경"></a>
-  <a href="./docs/deployment.md"><img src="https://img.shields.io/badge/🚀-배포-527410?style=flat-square" alt="배포"></a>
-  <a href="./docs/architecture.md"><img src="https://img.shields.io/badge/📐-설계%20노트-6E7075?style=flat-square" alt="설계 노트"></a>
-  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-84878C?style=flat-square" alt="MIT"></a>
-</p>
+<div align="center">
+
+[![사이트 보기](https://img.shields.io/badge/사이트_보기-blogyu-ff00bc?style=flat-square)](https://blogyu-web.tech-blogyu.workers.dev)
+[![개발 환경](https://img.shields.io/badge/문서-개발_환경-000000?style=flat-square)](./docs/development.md)
+[![배포](https://img.shields.io/badge/문서-배포-000000?style=flat-square)](./docs/deployment.md)
+[![설계 노트](https://img.shields.io/badge/문서-설계_노트-000000?style=flat-square)](./docs/architecture.md)
+[![License](https://img.shields.io/github/license/wjsrbgus04/tech-blogyu?style=flat-square&color=000000)](./LICENSE)
+
+</div>
+
+<div align="center">
+
+[![Next.js](https://img.shields.io/badge/Next.js_16-000000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+[![Hono](https://img.shields.io/badge/Hono-000000?style=flat-square&logo=hono&logoColor=white)](https://hono.dev/)
+[![Drizzle](https://img.shields.io/badge/Drizzle-000000?style=flat-square&logo=drizzle&logoColor=white)](https://orm.drizzle.team/)
+[![Neon](https://img.shields.io/badge/Neon_Postgres-000000?style=flat-square&logo=postgresql&logoColor=white)](https://neon.tech/)
+[![Cloudflare Workers](https://img.shields.io/badge/Cloudflare_Workers-000000?style=flat-square&logo=cloudflareworkers&logoColor=white)](https://workers.cloudflare.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_v4-000000?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-000000?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+
+</div>
 
 <br/>
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/post-dark.png">
-  <source media="(prefers-color-scheme: light)" srcset="docs/screenshots/home-light.png">
-  <img src="docs/screenshots/home-light.png" alt="blogyu 화면">
-</picture>
+<img src="docs/screenshots/home.png" alt="blogyu 홈 — 히어로 글과 3열 카드 그리드">
+
+<br/>
+
+<img src="docs/screenshots/post.png" alt="blogyu 글 상세 — 커버, 본문, 오른쪽 목차">
 
 ## 무엇인가
 
@@ -31,12 +45,15 @@
 
 발행하면 API 가 프론트엔드로 웹훅을 쏘고, 해당 페이지만 몇 초 안에 갱신된다. 전체 재빌드는 없다.
 
+화면은 [디자인 시스템 v2](./docs/design/DESIGN.md) — 흰 종이 위 검정 잉크에 마젠타 한 색, 상단 내비와 이미지 카드 그리드, radius·그림자 없음, 라이트 전용 — 를 따른다.
+
 ## 기능
 
-- **글쓰기** — 마크다운 에디터, 미리보기, 예약 발행, 이미지 업로드
-- **읽기** — 목차 자동 생성, 코드 하이라이팅(라이트/다크 두 벌), 태그·시리즈, 한국어 검색
+- **글쓰기** — 마크다운 에디터, 미리보기, 예약 발행, 이미지 업로드·외부 커버 주소, 시리즈 관리
+- **읽기** — 히어로 + 카드 그리드, 목차 레일, 코드 하이라이팅, 태그·시리즈, 한국어 검색
 - **캐시** — ISR 로 페이지를 캐시하고, 글을 고치면 그 페이지만 골라 비운다
-- **SEO** — 사이트맵·RSS·JSON-LD, 글마다 OG 이미지를 그려서 내보낸다
+- **SEO** — 사이트맵·RSS·JSON-LD·canonical, 글마다 OG 이미지를 그려서 내보낸다. 발행하면 IndexNow 로 검색엔진에 알린다
+- **AI 크롤러** — `llms.txt` 와 글별 마크다운 원문(`/posts/<slug>/index.md`)을 내보낸다
 - **댓글** — Giscus (GitHub Discussions)
 - **타입 안전** — 프론트엔드가 백엔드 라우터 타입을 그대로 가져다 쓴다. API 를 고치면 화면 쪽에서 타입 에러가 난다
 
@@ -62,7 +79,7 @@ pnpm dev
 ```
 apps/web    Next.js 16 — 공개 화면, 어드민, ISR
 apps/api    Hono — REST API, GitHub OAuth, 이미지 중계
-docs/       설계 문서와 UI 시안
+docs/       설계 노트, 디자인 시스템, 배포·개발 문서
 ```
 
 ```mermaid
@@ -92,8 +109,8 @@ flowchart LR
 - [Cloudflare Workers](https://workers.cloudflare.com/) — web·api 런타임
 - [OpenNext](https://opennext.js.org/cloudflare) — Next.js 를 Workers 에 올리는 어댑터
 - [R2](https://developers.cloudflare.com/r2/) + [Durable Objects](https://developers.cloudflare.com/durable-objects/) — ISR 캐시·이미지, 재검증 큐
-- [Tailwind v4](https://tailwindcss.com/) — 스타일
-- [Shiki](https://shiki.style/) — 코드 하이라이팅
+- [Tailwind v4](https://tailwindcss.com/) — 스타일. 토큰은 `docs/design/theme.css` 가 정본이다
+- [Shiki](https://shiki.style/) — 코드 하이라이팅, 테마는 직접 만들었다
 - [Biome](https://biomejs.dev/) — 린트·포맷
 - [Turborepo](https://turbo.build/) + [pnpm](https://pnpm.io/) — 모노레포
 
