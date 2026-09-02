@@ -23,11 +23,11 @@ export default async function Image() {
         fontFamily: 'Pretendard',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        <div style={{ width: 20, height: 20, borderRadius: 999, background: OG.accent }} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+        <div style={{ width: 36, height: 36, background: OG.accent }} />
         <div style={{ fontSize: 64, color: OG.fg, letterSpacing: -2 }}>blogyu</div>
       </div>
-      <div style={{ marginTop: 24, fontSize: 32, color: OG.fgMuted, lineHeight: 1.5 }}>
+      <div style={{ marginTop: 28, fontSize: 32, color: OG.fgMuted, lineHeight: 1.5 }}>
         직접 경험한 것과 해결해본 것에 대해 씁니다.
       </div>
     </div>,
