@@ -2,9 +2,8 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { JsonLd } from '@/components/jsonLd'
 import { Pagination } from '@/components/pagination'
-import { PostList, type PostSummary } from '@/components/postList'
+import { PostGrid, PostHero, type PostSummary } from '@/components/postGrid'
 import { Shell } from '@/components/shell'
-import { Sidebar } from '@/components/sidebar'
 import { api, cached } from '@/lib/apiClient'
 import { websiteLd } from '@/lib/jsonLd'
 import { siteAlternates } from '@/lib/seo'
@@ -59,31 +58,37 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
    */
   if (data && page > 1 && page > data.totalPages) notFound()
 
+  if (!data) {
+    return (
+      <Shell>
+        <p className="py-16 text-center text-body">
+          글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
+        </p>
+      </Shell>
+    )
+  }
+
+  const items = data.items as PostSummary[]
+  // 첫 페이지의 가장 최근 글이 히어로다. 다음 페이지부터는 그리드만 이어진다.
+  const [hero, ...rest] = page === 1 ? items : []
+  const gridItems = page === 1 ? rest : items
+
   return (
-    <Shell sidebar={<Sidebar />}>
+    <Shell>
       {/* 검색 결과에 뜨는 사이트 이름을 이 구조화 데이터가 정한다 */}
       <JsonLd data={websiteLd()} />
 
-      <div className="mb-1 flex items-baseline justify-between gap-4 border-border border-b pb-[1.1rem]">
-        <h1 className="label">최근 글</h1>
-        <a
-          href="/feed.xml"
-          className="text-[0.75rem] text-fg-faint transition-colors hover:text-accent-ink"
-        >
-          RSS 구독
-        </a>
-      </div>
+      <h1 className="sr-only">최근 글</h1>
 
-      {data ? (
-        <>
-          <PostList items={data.items as PostSummary[]} startIndex={(page - 1) * PAGE_SIZE} />
-          <Pagination page={data.page} totalPages={data.totalPages} />
-        </>
-      ) : (
-        <p className="py-16 text-center text-[0.9375rem] text-fg-faint">
-          글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
-        </p>
+      {hero && (
+        <section className="mb-12">
+          <PostHero post={hero} />
+        </section>
       )}
+
+      {(gridItems.length > 0 || !hero) && <PostGrid items={gridItems} />}
+
+      <Pagination page={data.page} totalPages={data.totalPages} />
     </Shell>
   )
 }

@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
-import { PostList, type PostSummary } from '@/components/postList'
+import { PostGrid, type PostSummary } from '@/components/postGrid'
 import { Shell } from '@/components/shell'
-import { Sidebar } from '@/components/sidebar'
 import { api, uncached } from '@/lib/apiClient'
 import { siteAlternates } from '@/lib/seo'
 
@@ -34,39 +33,39 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   }
 
   return (
-    <Shell sidebar={<Sidebar />}>
-      <h1 className="label mb-4 block">검색</h1>
+    <Shell>
+      <h1 className="mb-6 text-display font-semibold">검색</h1>
 
       <search>
-        <form className="mb-5 flex gap-2">
+        <form className="mb-12">
           <input
             type="search"
             name="q"
             defaultValue={query}
             placeholder="제목·본문·태그 검색"
             aria-label="검색어"
-            className="min-w-0 flex-1 rounded-md border border-border bg-bg-subtle px-4 py-2.5 text-base transition-colors focus:border-border-strong focus:bg-bg"
+            // biome-ignore lint/a11y/noAutofocus: 검색 화면의 유일한 입력이라 바로 타이핑할 수 있어야 한다
+            autoFocus
+            className="w-full max-w-[40rem] border border-input-border bg-bg px-4 py-3 text-body-lg placeholder:text-fg-faint"
           />
         </form>
       </search>
 
       {query && (
-        <p className="mb-6 text-[0.8125rem] text-fg-faint">
-          <b className="font-[560] text-fg">{query}</b> — {items.length}건
+        <p className="mb-8 text-caption">
+          <b className="font-semibold">{query}</b> — {items.length}건
         </p>
       )}
 
       {failed ? (
-        <p className="py-16 text-center text-[0.9375rem] text-fg-faint">
+        <p className="py-16 text-center text-body">
           검색에 실패했습니다. 잠시 후 다시 시도해 주세요.
         </p>
       ) : query && items.length === 0 ? (
-        <p className="py-16 text-center text-[0.9375rem] text-fg-faint">
-          검색 결과가 없습니다. 다른 낱말로 찾아보세요.
-        </p>
-      ) : (
-        <PostList items={items} />
-      )}
+        <p className="py-16 text-center text-body">검색 결과가 없습니다. 다른 낱말로 찾아보세요.</p>
+      ) : query ? (
+        <PostGrid items={items} />
+      ) : null}
     </Shell>
   )
 }

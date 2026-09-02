@@ -3,9 +3,8 @@ import { notFound } from 'next/navigation'
 import { JsonLd } from '@/components/jsonLd'
 import { LoadError } from '@/components/loadError'
 import { Pagination } from '@/components/pagination'
-import { PostList, type PostSummary } from '@/components/postList'
+import { PostGrid, type PostSummary } from '@/components/postGrid'
 import { Shell } from '@/components/shell'
-import { Sidebar } from '@/components/sidebar'
 import { api, cached } from '@/lib/apiClient'
 import { breadcrumbLd, collectionPageLd } from '@/lib/jsonLd'
 import { loadOrFail } from '@/lib/loadResult'
@@ -75,7 +74,7 @@ export default async function TagArchivePage({
   if (!result.ok && result.reason === 'notFound') notFound()
   if (!result.ok) {
     return (
-      <Shell sidebar={<Sidebar />}>
+      <Shell>
         <LoadError label="태그" />
       </Shell>
     )
@@ -102,7 +101,7 @@ export default async function TagArchivePage({
   if (page > 1 && page > totalPages) notFound()
 
   return (
-    <Shell sidebar={<Sidebar />}>
+    <Shell>
       <JsonLd
         data={[
           collectionPageLd({
@@ -119,17 +118,17 @@ export default async function TagArchivePage({
         ]}
       />
 
-      <header className="mb-1 border-border border-b pb-6">
-        <h1 className="mb-2 font-[620] text-[clamp(1.75rem,4vw,2.5rem)] tracking-[-0.022em]">
+      <header className="mb-12">
+        <h1 className="mb-4 text-display font-semibold">
           <span className="text-accent">#</span>
           {tag.name}
         </h1>
-        <p className="max-w-[46ch] text-[0.875rem] text-fg-muted">
+        <p className="max-w-[46ch] text-body-lg">
           {tag.description ?? `${tag.name} 태그가 붙은 글 ${tag.count}편.`}
         </p>
       </header>
 
-      <PostList items={posts} startIndex={(page - 1) * PAGE_SIZE} />
+      <PostGrid items={posts} />
       <Pagination page={page} totalPages={totalPages} basePath={`/tags/${tag.name}`} />
     </Shell>
   )

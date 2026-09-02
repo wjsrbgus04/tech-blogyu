@@ -10,6 +10,7 @@ const FIELD_LABELS: Record<string, string> = {
   status: '발행 상태',
   publishedAt: '발행일',
   coverImageUrl: '커버 이미지',
+  description: '설명',
   seriesId: '시리즈',
   seriesOrder: '시리즈 순서',
   q: '검색어',

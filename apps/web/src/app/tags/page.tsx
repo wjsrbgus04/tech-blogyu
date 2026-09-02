@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { JsonLd } from '@/components/jsonLd'
 import { Shell } from '@/components/shell'
-import { Sidebar } from '@/components/sidebar'
 import { api, cached } from '@/lib/apiClient'
 import { breadcrumbLd } from '@/lib/jsonLd'
 import { siteAlternates } from '@/lib/seo'
@@ -26,7 +25,7 @@ export default async function TagsPage() {
   }
 
   return (
-    <Shell sidebar={<Sidebar />}>
+    <Shell>
       <JsonLd
         data={breadcrumbLd([
           { name: '홈', path: '/' },
@@ -34,19 +33,21 @@ export default async function TagsPage() {
         ])}
       />
 
-      <h1 className="label mb-4 block">전체 태그</h1>
-      <div className="flex flex-wrap gap-1.5">
-        {items.map((tag) => (
-          <Link
-            key={tag.name}
-            href={`/tags/${tag.name}`}
-            className="inline-flex items-baseline gap-1.5 rounded-sm border border-border px-2.5 py-1.5 text-[0.875rem] text-fg-muted transition-colors hover:border-border-strong hover:text-fg"
-          >
-            {tag.name}
-            <span className="tabular text-[0.75rem] opacity-55">{tag.count}</span>
-          </Link>
-        ))}
-      </div>
+      <h1 className="mb-8 text-display font-semibold">전체 태그</h1>
+      {items.length === 0 ? (
+        <p className="py-16 text-center text-body">아직 태그가 없습니다.</p>
+      ) : (
+        <ul className="flex flex-wrap gap-x-6 gap-y-4 text-body-lg">
+          {items.map((tag) => (
+            <li key={tag.name} className="inline-flex items-baseline gap-1.5">
+              <Link href={`/tags/${tag.name}`} className="ink-link">
+                {tag.name}
+              </Link>
+              <span className="tabular text-caption text-fg-faint">{tag.count}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </Shell>
   )
 }

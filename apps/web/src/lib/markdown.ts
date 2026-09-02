@@ -23,7 +23,7 @@ import typescript from 'shiki/langs/typescript.mjs'
 import yaml from 'shiki/langs/yaml.mjs'
 import { unified } from 'unified'
 import { visit } from 'unist-util-visit'
-import { codeThemeDark, codeThemeLight } from './codeTheme'
+import { codeTheme } from './codeTheme'
 
 export type TocItem = {
   id: string
@@ -52,12 +52,12 @@ function collectHeadings(sink: TocItem[]) {
 }
 
 /**
- * 라이트/다크 두 벌을 CSS 변수로 내보낸다. defaultColor: false 이므로
+ * 색을 CSS 변수(--shiki-light)로 내보낸다. defaultColor: false 이므로
  * 실제 색 적용은 globals.css 의 `.prose pre span` 규칙이 담당한다 —
  * 이 규칙이 없으면 변수만 심기고 코드가 전부 단색으로 나온다.
  */
 const shikiOptions = {
-  themes: { light: codeThemeLight.name, dark: codeThemeDark.name },
+  themes: { light: codeTheme.name },
   // false 로 좁혀둔다 — boolean 으로 넓어지면 rehype-shiki 옵션 타입과 안 맞는다
   defaultColor: false as const,
   cssVariablePrefix: '--shiki-',
@@ -93,7 +93,7 @@ let highlighter: ReturnType<typeof createHighlighterCore> | null = null
 /** 문법 로딩이 비싸므로 한 번만 만들어 재사용한다. */
 function getHighlighter() {
   highlighter ??= createHighlighterCore({
-    themes: [codeThemeLight, codeThemeDark],
+    themes: [codeTheme],
     langs: languages,
     // JS 정규식 엔진을 쓰면 oniguruma 의 onig.wasm(466KB)을 싣지 않아도 된다.
     engine: createJavaScriptRegexEngine(),

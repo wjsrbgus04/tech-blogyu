@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { JsonLd } from '@/components/jsonLd'
 import { Shell } from '@/components/shell'
-import { Sidebar } from '@/components/sidebar'
 import { api, cached } from '@/lib/apiClient'
 import { breadcrumbLd } from '@/lib/jsonLd'
 import { siteAlternates } from '@/lib/seo'
@@ -26,7 +25,7 @@ export default async function SeriesIndexPage() {
   }
 
   return (
-    <Shell sidebar={<Sidebar />}>
+    <Shell>
       <JsonLd
         data={breadcrumbLd([
           { name: '홈', path: '/' },
@@ -34,25 +33,18 @@ export default async function SeriesIndexPage() {
         ])}
       />
 
-      <h1 className="label mb-4 block">전체 시리즈</h1>
+      <h1 className="mb-8 text-display font-semibold">전체 시리즈</h1>
 
       {items.length === 0 ? (
-        <p className="py-16 text-center text-[0.9375rem] text-fg-faint">아직 시리즈가 없습니다.</p>
+        <p className="py-16 text-center text-body">아직 시리즈가 없습니다.</p>
       ) : (
-        <ul className="border-border border-t">
+        <ul className="flex flex-col gap-4 text-body-lg">
           {items.map((item) => (
-            <li key={item.slug} className="border-border border-b">
-              <Link
-                href={`/series/${item.slug}`}
-                className="group flex items-baseline justify-between gap-4 py-4 text-fg-muted transition-colors hover:text-fg"
-              >
-                <span className="text-[0.9375rem] transition-colors group-hover:text-accent-ink">
-                  {item.title}
-                </span>
-                <span className="tabular shrink-0 text-[0.8125rem] text-fg-faint">
-                  {item.count}편
-                </span>
+            <li key={item.slug} className="flex items-baseline gap-3">
+              <Link href={`/series/${item.slug}`} className="ink-link">
+                {item.title}
               </Link>
+              <span className="tabular text-caption text-fg-faint">{item.count}편</span>
             </li>
           ))}
         </ul>

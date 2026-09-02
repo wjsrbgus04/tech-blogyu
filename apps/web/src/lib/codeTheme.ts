@@ -3,12 +3,12 @@ import type { ThemeRegistrationRaw } from 'shiki'
 /**
  * 코드 하이라이팅 테마.
  *
- * 기성 테마(github-dark 등)는 빨강·파랑·보라를 함께 써서 모노크롬 아트디렉션과 충돌한다.
- * 그래서 시안에서 정한 규칙을 그대로 옮긴 테마를 만든다.
+ * 기성 테마(github-light 등)는 빨강·파랑·보라를 함께 써서 "잉크 + 마젠타 한 색"
+ * 아트디렉션과 충돌한다. 그래서 docs/design 의 규칙을 그대로 옮긴 테마를 만든다.
  *
- *   키워드 → 액센트(라임)   문자열 → 뉴트럴   주석 → faint   나머지 → 본문색
+ *   키워드 → 마젠타(잉크로만)   식별자 → 검정   문자열·숫자 → 진회색   주석 → 회색
  *
- * 값은 tokens.css 의 oklch 를 sRGB 로 변환한 것이다. 팔레트를 바꾸면 여기도 같이 고친다.
+ * 사이트가 라이트 전용이라 테마도 한 벌이다.
  */
 
 type Palette = {
@@ -20,11 +20,7 @@ type Palette = {
   punctuation: string
 }
 
-function build(
-  name: string,
-  type: 'light' | 'dark',
-  c: Palette,
-): ThemeRegistrationRaw & { name: string } {
+function build(name: string, type: 'light', c: Palette): ThemeRegistrationRaw & { name: string } {
   return {
     name,
     type,
@@ -77,20 +73,11 @@ function build(
   }
 }
 
-export const codeThemeLight = build('blogyu-light', 'light', {
-  base: '#5C5F64',
-  ident: '#111215',
-  keyword: '#527410',
-  string: '#56595E',
-  comment: '#6E7075',
-  punctuation: '#84878C',
-})
-
-export const codeThemeDark = build('blogyu-dark', 'dark', {
-  base: '#999BA0',
-  ident: '#EDEEF1',
-  keyword: '#BBEF39',
-  string: '#C8CACE',
-  comment: '#85888D',
-  punctuation: '#75787D',
+export const codeTheme = build('blogyu', 'light', {
+  base: '#303030',
+  ident: '#000000',
+  keyword: '#ff00bc',
+  string: '#4a4a4a',
+  comment: '#7a7a7a',
+  punctuation: '#6b6b6b',
 })

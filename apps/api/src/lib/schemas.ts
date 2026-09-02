@@ -85,6 +85,36 @@ export const postInputSchema = z.object({
 
 export const postPatchSchema = postInputSchema.partial()
 
+/** 시리즈 입력 길이 제한. 컬럼(slug 120)보다 좁게 잡아 URL 과 내비에서 다루기 쉽게 한다. */
+export const SERIES_LIMITS = {
+  slug: 60,
+  title: 60,
+  description: 200,
+} as const
+
+export const seriesInputSchema = z.object({
+  slug: z
+    .string()
+    .min(1, '주소를 입력해 주세요.')
+    .max(SERIES_LIMITS.slug, `주소가 너무 깁니다. ${SERIES_LIMITS.slug}자 안으로 줄여주세요.`)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, '소문자·숫자·하이픈만 쓸 수 있습니다.'),
+  title: z
+    .string()
+    .trim()
+    .min(1, '제목을 입력해 주세요.')
+    .max(SERIES_LIMITS.title, `제목이 너무 깁니다. ${SERIES_LIMITS.title}자 안으로 줄여주세요.`),
+  description: z
+    .string()
+    .trim()
+    .max(
+      SERIES_LIMITS.description,
+      `설명이 너무 깁니다. ${SERIES_LIMITS.description}자 안으로 줄여주세요.`,
+    )
+    .nullish(),
+})
+
+export const seriesPatchSchema = seriesInputSchema.partial()
+
 export const adminListQuerySchema = z.object({
   status: z.enum(['all', 'draft', 'published', 'scheduled']).default('all'),
   page: z.coerce.number().int().min(1).default(1),
@@ -92,3 +122,4 @@ export const adminListQuerySchema = z.object({
 })
 
 export type PostInput = z.infer<typeof postInputSchema>
+export type SeriesInput = z.infer<typeof seriesInputSchema>
