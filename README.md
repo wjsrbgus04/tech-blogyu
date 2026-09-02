@@ -11,10 +11,10 @@
 
 <div align="center">
 
-[![사이트 보기](https://img.shields.io/badge/사이트_보기-blogyu-ff00bc?style=flat-square)](https://blogyu-web.tech-blogyu.workers.dev)
-[![개발 환경](https://img.shields.io/badge/문서-개발_환경-000000?style=flat-square)](./docs/development.md)
-[![배포](https://img.shields.io/badge/문서-배포-000000?style=flat-square)](./docs/deployment.md)
-[![설계 노트](https://img.shields.io/badge/문서-설계_노트-000000?style=flat-square)](./docs/architecture.md)
+[![사이트 보기](https://img.shields.io/badge/link-blogyu-ff00bc?style=flat-square)](https://blogyu-web.tech-blogyu.workers.dev)
+[![개발 환경](https://img.shields.io/badge/docs-dev-000000?style=flat-square)](./docs/development.md)
+[![배포](https://img.shields.io/badge/docs-deploy-000000?style=flat-square)](./docs/deployment.md)
+[![설계 노트](https://img.shields.io/badge/docs-architecture-000000?style=flat-square)](./docs/architecture.md)
 [![License](https://img.shields.io/github/license/wjsrbgus04/tech-blogyu?style=flat-square&color=000000)](./LICENSE)
 
 </div>
