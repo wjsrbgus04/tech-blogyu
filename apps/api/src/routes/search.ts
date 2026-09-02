@@ -32,6 +32,8 @@ export const searchRoute = new Hono<Env>().get(
         slug: posts.slug,
         title: posts.title,
         excerpt: posts.excerpt,
+        // 검색 결과도 카드 그리드로 그리므로 목록과 같은 필드를 내려준다
+        coverImageUrl: posts.coverImageUrl,
         publishedAt: posts.publishedAt,
         readingMinutes: posts.readingMinutes,
       })

@@ -80,6 +80,8 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
   const [error, setError] = useState<string | null>(null)
   const [dirty, setDirty] = useState(false)
   const [seriesList, setSeriesList] = useState<{ id: string; title: string }[]>([])
+  /** 외부 이미지 주소를 붙여넣는 칸. 업로드 없이 커버를 지정할 때 쓴다. */
+  const [coverUrlDraft, setCoverUrlDraft] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const patch = useCallback((next: Partial<EditorValue>) => {
@@ -279,7 +281,7 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
               /* 라디오에서 고른 상태가 곧 발행 방식이다. 여기서 'published' 를
                  강제하면 예약을 골라도 즉시 발행으로 저장돼 버린다. */
               onClick={() => save(value.status === 'draft' ? 'published' : value.status)}
-              className="cursor-pointer rounded-sm border border-accent bg-accent px-3.5 py-2 font-[600] text-[0.8125rem] text-accent-fg transition-[filter] hover:brightness-105 disabled:opacity-50"
+              className="cursor-pointer rounded-sm border border-fg bg-fg px-3.5 py-2 font-[600] text-[0.8125rem] text-bg transition-opacity hover:opacity-85 disabled:opacity-50"
             >
               {saving ? '저장 중…' : value.status === 'scheduled' ? '예약 발행' : '발행'}
             </button>
@@ -301,7 +303,7 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
           onChange={(event) => patch({ title: event.target.value })}
           maxLength={LIMITS.title}
           placeholder="제목"
-          className="no-focus-underline mb-5 w-full border-border border-b bg-transparent pb-4 font-bold text-[1.75rem] leading-[1.4] tracking-[-0.008em] outline-none placeholder:text-fg-faint focus:border-accent"
+          className="mb-5 w-full border-border border-b bg-transparent pb-4 font-bold text-[1.75rem] leading-[1.4] tracking-[-0.008em] outline-none placeholder:text-fg-faint focus:border-accent"
         />
 
         <div className="grid grid-cols-[minmax(0,1fr)_17.5rem] items-start gap-8 max-lg:block">
@@ -383,7 +385,7 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
                       name="status"
                       checked={value.status === option}
                       onChange={() => patch({ status: option })}
-                      className="accent-[var(--accent-ink)]"
+                      className="accent-[var(--color-accent)]"
                     />
                     {option === 'published' ? '발행됨' : option === 'draft' ? '임시저장' : '예약'}
                   </label>
@@ -523,33 +525,63 @@ export function PostEditor({ postId, initial }: { postId?: string; initial?: Edi
                   </button>
                 </div>
               ) : (
-                <label className="grid min-h-[5.5rem] cursor-pointer place-items-center rounded-sm border border-border-strong border-dashed text-[0.75rem] text-fg-faint transition-colors hover:text-fg">
-                  1200 × 630 올리기
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="sr-only"
-                    onChange={async (event) => {
-                      const file = event.target.files?.[0]
-                      event.target.value = ''
-                      if (!file) return
+                <div>
+                  <label className="grid min-h-[5.5rem] cursor-pointer place-items-center rounded-sm border border-border-strong border-dashed text-[0.75rem] text-fg-faint transition-colors hover:text-fg">
+                    1200 × 630 올리기
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="sr-only"
+                      onChange={async (event) => {
+                        const file = event.target.files?.[0]
+                        event.target.value = ''
+                        if (!file) return
 
-                      const form = new FormData()
-                      form.append('file', file)
-                      const res = await fetch(`${API_URL}/admin/uploads`, {
-                        method: 'POST',
-                        body: form,
-                        credentials: 'include',
-                      })
-                      if (res.ok) {
-                        const { url } = (await res.json()) as { url: string }
-                        patch({ coverImageUrl: url })
-                      } else {
-                        setError('커버 이미지 업로드에 실패했습니다.')
+                        const form = new FormData()
+                        form.append('file', file)
+                        const res = await fetch(`${API_URL}/admin/uploads`, {
+                          method: 'POST',
+                          body: form,
+                          credentials: 'include',
+                        })
+                        if (res.ok) {
+                          const { url } = (await res.json()) as { url: string }
+                          patch({ coverImageUrl: url })
+                        } else {
+                          setError('커버 이미지 업로드에 실패했습니다.')
+                        }
+                      }}
+                    />
+                  </label>
+                  <form
+                    className="mt-2 flex gap-1.5"
+                    onSubmit={(event) => {
+                      event.preventDefault()
+                      const url = coverUrlDraft.trim()
+                      if (!URL.canParse(url)) {
+                        setError('커버 이미지 주소가 올바르지 않습니다.')
+                        return
                       }
+                      patch({ coverImageUrl: url })
+                      setCoverUrlDraft('')
                     }}
-                  />
-                </label>
+                  >
+                    <input
+                      value={coverUrlDraft}
+                      onChange={(event) => setCoverUrlDraft(event.target.value)}
+                      placeholder="또는 이미지 주소 붙여넣기"
+                      aria-label="커버 이미지 주소"
+                      className="min-w-0 flex-1 rounded-sm border border-transparent bg-bg-subtle px-2.5 py-1.5 text-[0.75rem] focus:border-border-strong focus:bg-bg"
+                    />
+                    <button
+                      type="submit"
+                      disabled={!coverUrlDraft.trim()}
+                      className="cursor-pointer rounded-sm border border-border px-2.5 py-1.5 text-[0.75rem] transition-colors hover:border-border-strong disabled:opacity-50"
+                    >
+                      넣기
+                    </button>
+                  </form>
+                </div>
               )}
               <p className="mt-1.5 text-[0.625rem] text-fg-faint leading-relaxed">
                 비우면 제목·태그로 OG 이미지를 생성합니다

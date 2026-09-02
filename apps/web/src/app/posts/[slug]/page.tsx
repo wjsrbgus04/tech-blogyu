@@ -6,11 +6,10 @@ import { Comments } from '@/components/comments'
 import { LoadError } from '@/components/loadError'
 import { RelativeTime } from '@/components/relativeTime'
 import { Shell } from '@/components/shell'
-import { Sidebar } from '@/components/sidebar'
 import { Toc } from '@/components/toc'
 import { ViewCounter } from '@/components/viewCounter'
 import { api, cached, SITE_URL } from '@/lib/apiClient'
-import { formatDate, toIsoDate } from '@/lib/date'
+import { formatDateLong, toIsoDate } from '@/lib/date'
 import { loadOrFail } from '@/lib/loadResult'
 import { renderMarkdown } from '@/lib/markdown'
 
@@ -82,7 +81,7 @@ export default async function PostPage({ params }: { params: Promise<Params> }) 
   if (!result.ok && result.reason === 'notFound') notFound()
   if (!result.ok) {
     return (
-      <Shell sidebar={<Sidebar />}>
+      <Shell>
         <LoadError label="글" />
       </Shell>
     )
@@ -104,35 +103,45 @@ export default async function PostPage({ params }: { params: Promise<Params> }) 
   }
 
   return (
-    <Shell sidebar={<Sidebar toc={<Toc items={toc} />} />}>
+    // 헤딩이 없는 글은 레일 없이 한 단으로 — 빈 레일이 본문 폭만 잡아먹는다
+    <Shell aside={toc.length > 0 ? <Toc items={toc} /> : undefined}>
       <script
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD 구조화 데이터
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <article className="max-w-[44rem]">
-        <header className="mb-11 border-border border-b pb-8">
+      <article className="max-w-[46rem]">
+        <header className="mb-12">
+          {/* 커버는 히어로처럼 16:7 로 꽉 채운다. 자동 생성 OG 는 제목이 겹치므로 여기선 안 쓴다 */}
+          {post.coverImageUrl && (
+            // biome-ignore lint/performance/noImgElement: R2 원본을 그대로 쓴다
+            <img
+              src={post.coverImageUrl}
+              alt=""
+              width={1200}
+              height={525}
+              className="mb-6 aspect-[16/7] w-full object-cover"
+              fetchPriority="high"
+            />
+          )}
+
           {/* 날짜와 상대 표기만. 읽는 시간은 아래로 내려 둘을 섞지 않는다. */}
-          <p className="tabular mb-[1.1rem] flex flex-wrap items-baseline gap-2.5 text-[0.8125rem] text-fg-faint">
-            <time dateTime={toIsoDate(post.publishedAt)}>{formatDate(post.publishedAt)}</time>
+          <p className="mb-5 flex flex-wrap items-baseline gap-2.5 text-caption">
+            <time dateTime={toIsoDate(post.publishedAt)}>{formatDateLong(post.publishedAt)}</time>
             <RelativeTime iso={toIsoDate(post.publishedAt) ?? null} />
           </p>
 
-          <h1 className="mb-[1.1rem] font-bold text-[clamp(2rem,4.2vw,3.125rem)] leading-[1.26] tracking-[-0.008em]">
-            {post.title}
-          </h1>
+          <h1 className="mb-5 text-display font-semibold">{post.title}</h1>
 
-          <p className="mb-6 max-w-[40rem] text-[1.125rem] text-fg-muted leading-[1.72]">
-            {post.excerpt}
-          </p>
+          <p className="mb-6 text-body-lg">{post.excerpt}</p>
 
-          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-caption">
             {tags.length > 0 ? (
-              <ul className="flex flex-wrap gap-1.5">
+              <ul className="flex flex-wrap gap-x-4 gap-y-2">
                 {tags.map((tag) => (
                   <li key={tag}>
-                    <Link href={`/tags/${tag}`} className="chip">
+                    <Link href={`/tags/${tag}`} className="ink-link">
                       {tag}
                     </Link>
                   </li>
@@ -141,9 +150,7 @@ export default async function PostPage({ params }: { params: Promise<Params> }) 
             ) : (
               <span />
             )}
-            <span className="tabular text-[0.8125rem] text-fg-faint">
-              {post.readingMinutes}분 분량
-            </span>
+            <span className="tabular text-fg-faint">{post.readingMinutes}분 분량</span>
           </div>
         </header>
 
@@ -151,25 +158,25 @@ export default async function PostPage({ params }: { params: Promise<Params> }) 
         <div className="prose" dangerouslySetInnerHTML={{ __html: html }} />
 
         {series && (
-          <aside className="my-10 rounded-md border border-border bg-bg-subtle px-5 py-[1.1rem]">
-            <span className="label mb-3 block">시리즈 · {series.title}</span>
-            <ol className="text-[0.875rem]">
+          <aside className="my-12 border-border border-y py-6">
+            <span className="label mb-4 block">시리즈 · {series.title}</span>
+            <ol className="text-body">
               {series.posts.map((item, index) => {
                 const isCurrent = item.slug === post.slug
                 return (
-                  <li key={item.slug} className="flex gap-2.5 py-1">
+                  <li key={item.slug} className="flex gap-3 py-1.5">
                     <span
                       aria-hidden="true"
-                      className={`tabular shrink-0 pt-0.5 text-[0.8125rem] ${isCurrent ? 'text-accent-ink' : 'text-fg-faint'}`}
+                      className={`tabular shrink-0 ${isCurrent ? 'text-accent' : 'text-fg-faint'}`}
                     >
                       {index + 1}.
                     </span>
                     {isCurrent ? (
-                      <span aria-current="true" className="font-[560] text-fg">
+                      <span aria-current="true" className="font-semibold">
                         {item.title}
                       </span>
                     ) : (
-                      <Link href={`/posts/${item.slug}`} className="text-fg-muted hover:text-fg">
+                      <Link href={`/posts/${item.slug}`} className="title-link">
                         {item.title}
                       </Link>
                     )}
@@ -183,7 +190,7 @@ export default async function PostPage({ params }: { params: Promise<Params> }) 
         <ViewCounter slug={post.slug} />
 
         <section aria-label="댓글" className="mt-16 border-border border-t pt-8">
-          <h2 className="mb-5 text-[0.9375rem]">댓글</h2>
+          <h2 className="mb-5 text-subheading font-semibold">댓글</h2>
           <Comments />
         </section>
       </article>

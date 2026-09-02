@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatDate, formatRelativeTime, toIsoDate } from './date'
+import { formatDate, formatDateLong, formatRelativeTime, toIsoDate } from './date'
 
 describe('formatDate', () => {
   it('한국식 표기로 바꾼다', () => {
@@ -15,6 +15,17 @@ describe('formatDate', () => {
     expect(formatDate(null)).toBe('—')
     expect(formatDate(undefined)).toBe('—')
     expect(formatDate('아무거나')).toBe('—')
+  })
+})
+
+describe('formatDateLong', () => {
+  it('요일까지 붙인다', () => {
+    expect(formatDateLong('2026-08-20T00:00:00.000Z')).toBe('2026년 8월 20일 목요일')
+  })
+
+  it('값이 없거나 잘못되면 대시를 준다', () => {
+    expect(formatDateLong(null)).toBe('—')
+    expect(formatDateLong('아무거나')).toBe('—')
   })
 })
 

@@ -12,6 +12,8 @@ import {
   idParamSchema,
   postInputSchema,
   postPatchSchema,
+  seriesInputSchema,
+  seriesPatchSchema,
 } from '../lib/schemas'
 import { estimateReadingMinutes } from '../lib/text'
 import { validationHook } from '../lib/validate'
@@ -62,6 +64,12 @@ async function syncTags(db: Db, postId: string, names: string[]): Promise<void> 
   const rows = await db.select({ id: tags.id }).from(tags).where(inArray(tags.name, unique))
 
   await db.insert(postsToTags).values(rows.map((row) => ({ postId, tagId: row.id })))
+}
+
+/** 시리즈에 속한 글 상세 경로. 시리즈 정보가 바뀌면 이 페이지들도 다시 그려야 한다. */
+async function seriesPostPaths(db: Db, seriesId: string): Promise<string[]> {
+  const rows = await db.select({ slug: posts.slug }).from(posts).where(eq(posts.seriesId, seriesId))
+  return rows.map((row) => `/posts/${row.slug}`)
 }
 
 /**
@@ -276,14 +284,95 @@ export const adminRoute = new Hono<Env>()
     return c.json({ ok: true })
   })
 
-  /** 에디터의 시리즈 셀렉트가 쓴다. */
+  /** 에디터의 시리즈 셀렉트와 관리 목록이 쓴다. 글 수를 같이 준다. */
   .get('/series', async (c) => {
     const rows = await c
       .get('db')
-      .select({ id: series.id, slug: series.slug, title: series.title })
+      .select({
+        id: series.id,
+        slug: series.slug,
+        title: series.title,
+        description: series.description,
+        count: sql<number>`count(${posts.id})::int`,
+      })
       .from(series)
+      .leftJoin(posts, eq(posts.seriesId, series.id))
+      .groupBy(series.id)
       .orderBy(desc(series.createdAt))
     return c.json({ items: rows })
+  })
+
+  .post('/series', zValidator('json', seriesInputSchema, validationHook), async (c) => {
+    const input = c.req.valid('json')
+
+    const [created] = await c
+      .get('db')
+      .insert(series)
+      .values({ slug: input.slug, title: input.title, description: input.description ?? null })
+      .returning({ id: series.id, slug: series.slug })
+      .catch(rethrowAsConflict)
+
+    if (!created) throw new HTTPException(500, { message: '시리즈 저장에 실패했습니다.' })
+
+    c.executionCtx.waitUntil(revalidate(c.env, ['/', `/series/${created.slug}`]))
+    return c.json(created, 201)
+  })
+
+  .patch(
+    '/series/:id',
+    zValidator('param', idParamSchema, validationHook),
+    zValidator('json', seriesPatchSchema, validationHook),
+    async (c) => {
+      const { id } = c.req.valid('param')
+      const input = c.req.valid('json')
+      const db = c.get('db')
+
+      const [existing] = await db
+        .select({ slug: series.slug })
+        .from(series)
+        .where(eq(series.id, id))
+        .limit(1)
+      if (!existing) throw new HTTPException(404, { message: '시리즈를 찾을 수 없습니다.' })
+
+      const [updated] = await db
+        .update(series)
+        .set({
+          ...(input.slug !== undefined && { slug: input.slug }),
+          ...(input.title !== undefined && { title: input.title }),
+          ...(input.description !== undefined && { description: input.description ?? null }),
+        })
+        .where(eq(series.id, id))
+        .returning({ id: series.id, slug: series.slug })
+        .catch(rethrowAsConflict)
+
+      if (!updated) throw new HTTPException(500, { message: '시리즈 수정에 실패했습니다.' })
+
+      // 제목·주소는 글 상세의 시리즈 박스에도 찍히므로 소속 글까지 무효화한다
+      const paths = ['/', `/series/${updated.slug}`, ...(await seriesPostPaths(db, id))]
+      if (existing.slug !== updated.slug) paths.push(`/series/${existing.slug}`)
+      c.executionCtx.waitUntil(revalidate(c.env, paths))
+
+      return c.json(updated)
+    },
+  )
+
+  /** 소속 글은 지우지 않는다 — FK 가 seriesId 만 null 로 풀어준다. */
+  .delete('/series/:id', zValidator('param', idParamSchema, validationHook), async (c) => {
+    const { id } = c.req.valid('param')
+    const db = c.get('db')
+
+    // 삭제 뒤에는 소속 관계가 사라지므로 경로를 먼저 모아둔다
+    const postPaths = await seriesPostPaths(db, id)
+
+    const [deleted] = await db
+      .delete(series)
+      .where(eq(series.id, id))
+      .returning({ slug: series.slug })
+
+    if (!deleted) throw new HTTPException(404, { message: '시리즈를 찾을 수 없습니다.' })
+
+    c.executionCtx.waitUntil(revalidate(c.env, ['/', `/series/${deleted.slug}`, ...postPaths]))
+    return c.json({ ok: true })
   })
 
   /** 본문·커버 이미지 업로드. R2에 넣고 공개 URL을 돌려준다. */

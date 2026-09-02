@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import type { TocItem } from '@/lib/markdown'
 
 /**
- * 목차. 스크롤에 따라 액센트 마커가 레일 위를 움직인다 —
- * 시안에서 정한 두 시그니처 중 하나다.
+ * 목차. 넓은 화면에서 오른쪽 레일에 붙고, 스크롤에 따라 마젠타 마커가
+ * hairline 레일 위를 움직인다. 좁은 화면에서는 본문 위에 놓인다.
  */
 export function Toc({ items }: { items: TocItem[] }) {
   const [activeId, setActiveId] = useState(items[0]?.id ?? '')
@@ -50,23 +50,21 @@ export function Toc({ items }: { items: TocItem[] }) {
   if (items.length === 0) return null
 
   return (
-    <div>
-      <span className="label mb-[0.65rem] block">목차</span>
-      <nav aria-label="목차" className="relative pl-[0.9rem]">
-        <div aria-hidden="true" className="absolute top-1 bottom-1 left-0 w-px bg-border-strong">
+    <aside className="sticky top-8 max-lg:static max-lg:mb-12">
+      <span className="label mb-3 block">목차</span>
+      <nav aria-label="목차" className="relative pl-4">
+        <div aria-hidden="true" className="absolute top-1 bottom-1 left-0 w-px bg-border">
           <span
             ref={markerRef}
-            className="absolute top-0 -left-px block h-[1.35rem] w-[3px] rounded-sm bg-accent transition-transform duration-200 ease-out"
+            className="absolute top-0 -left-px block h-[1.4rem] w-[2px] bg-accent transition-transform duration-200 ease-out"
           />
         </div>
 
-        <ol ref={listRef} className="text-[0.8125rem]">
+        <ol ref={listRef} className="text-caption">
           {items.map((item) => (
             <li
               key={item.id}
-              className={
-                item.level === 3 ? 'ml-3 text-[0.75rem] leading-[1.35rem]' : 'leading-[1.35rem]'
-              }
+              className={item.level === 3 ? 'ml-3 leading-[1.6rem]' : 'leading-[1.6rem]'}
             >
               <a
                 href={`#${item.id}`}
@@ -74,8 +72,8 @@ export function Toc({ items }: { items: TocItem[] }) {
                 onClick={() => setActiveId(item.id)}
                 className={
                   activeId === item.id
-                    ? 'block px-1 font-[560] text-fg'
-                    : 'block px-1 text-fg-faint transition-colors hover:text-fg-muted'
+                    ? 'block font-semibold'
+                    : 'block text-fg-faint transition-colors hover:text-fg'
                 }
               >
                 {item.text}
@@ -84,6 +82,6 @@ export function Toc({ items }: { items: TocItem[] }) {
           ))}
         </ol>
       </nav>
-    </div>
+    </aside>
   )
 }

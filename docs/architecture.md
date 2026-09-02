@@ -28,16 +28,19 @@ AUTH_COOKIE_DOMAIN=".blogyu.dev"
 
 - **어드민은 클라이언트에서 API를 직접 호출한다.** 세션 쿠키가 API 도메인에 걸려 있어 Next 서버가 볼 수 없기 때문이다.
 - **에디터 미리보기는 서버 액션으로 렌더한다.** Shiki(수 MB)를 클라이언트 번들에 넣지 않으면서 실제 글 화면과 같은 결과를 보장한다.
-- **OG 이미지 색은 `src/lib/ogTheme.ts`에 hex로 박혀 있다.** satori가 CSS 변수도 oklch도 해석하지 못한다. 다크 팔레트를 바꾸면 이 파일도 같이 고쳐야 한다.
+- **OG 이미지 색은 `src/lib/ogTheme.ts`에 hex로 박혀 있다.** satori가 CSS 변수를 해석하지 못한다. 팔레트를 바꾸면 이 파일도 같이 고쳐야 한다. 글별 OG 이미지는 커버가 없는 글의 카드 이미지로도 쓰인다.
 - **폰트는 self-host.** `next/font/google`은 Turbopack 빌드에서 한글 subset 다운로드가 깨진다.
 - **OG 폰트는 읽는 경로가 둘이다**(`src/lib/ogFont.ts`). 배포된 워커에는 파일시스템이 없어 정적 에셋 바인딩으로 읽고, `next build`와 `next dev`는 Node라 `public/`에서 직접 읽는다. 홈 OG 이미지가 빌드 시점에 미리 생성되므로 두 경로가 다 필요하다.
 - **마이그레이션은 `pg` 드라이버로 돈다.** drizzle-kit이 `@neondatabase/serverless`를 자동 감지하면 웹소켓으로 붙으려다 로컬에서 실패한다.
-- **코드 하이라이팅 테마는 직접 만들었다**(`src/lib/codeTheme.ts`). 기성 테마는 빨강·파랑·보라를 함께 써서 모노크롬 아트디렉션과 충돌한다. 키워드만 액센트로 두고 나머지는 뉴트럴로 간다.
+- **코드 하이라이팅 테마는 직접 만들었다**(`src/lib/codeTheme.ts`). 기성 테마는 빨강·파랑·보라를 함께 써서 "잉크 + 마젠타 한 색" 아트디렉션과 충돌한다. 키워드만 마젠타로 두고 나머지는 검정·회색으로 간다. 사이트가 라이트 전용이라 테마도 한 벌이다.
+- **Inter Variable 자리에 Pretendard를 쓴다.** 디자인 시스템은 Inter를 지정하지만 Pretendard의 라틴 글리프가 Inter 기반이라 같은 인상을 내고, 한글까지 덮는다. 폰트 파일을 하나 더 싣지 않아도 된다.
 
 ## 설계 문서
 
 화면 구조와 시각 디자인을 먼저 확정하고 구현했다.
 
-- [`wireframes/blog-wireframe.html`](./wireframes/blog-wireframe.html) — 구조 와이어프레임. 방향 A/B/C를 한 파일에서 전환 비교하고 **B(사이드바)로 확정**
-- [`design/blogyu-ui.html`](./design/blogyu-ui.html) — UI 시안 7화면, 다크·라이트
-- [`design/tokens.css`](./design/tokens.css) — 디자인 토큰. web의 `globals.css`가 이 파일을 기반으로 한다
+**현행 — v2 "Neon zine on white paper"**. 흰 종이 위 검정 잉크에 마젠타 한 색, 상단 내비 + 히어로 + 3열 이미지 카드, radius·그림자 없음, 라이트 전용.
+
+- [`design/DESIGN.md`](./design/DESIGN.md) — 스타일 레퍼런스. 색·타입·간격·컴포넌트·Do/Don't
+- [`design/theme.css`](./design/theme.css) · [`design/tokens.json`](./design/tokens.json) — 토큰. web의 `globals.css`가 이 값을 그대로 싣고 시맨틱 별칭(`bg`·`fg`·`border`·`accent`)을 얹는다
+- [`wireframes/blog-wireframe.html`](./wireframes/blog-wireframe.html) — v1 때의 구조 와이어프레임(좌측 사이드바 안). 지금 화면과 다르다

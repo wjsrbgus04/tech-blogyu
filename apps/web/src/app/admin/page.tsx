@@ -112,8 +112,8 @@ export default function AdminPostsPage() {
                   onClick={() => setFilter(item.key)}
                   className={
                     filter === item.key
-                      ? 'cursor-pointer rounded-[4px] bg-bg px-2.5 py-1 font-[520] text-[0.75rem] text-fg shadow-sm'
-                      : 'cursor-pointer rounded-[4px] px-2.5 py-1 font-[520] text-[0.75rem] text-fg-muted transition-colors hover:text-fg'
+                      ? 'cursor-pointer rounded-[4px] border border-border bg-bg px-2.5 py-1 font-[520] text-[0.75rem] text-fg'
+                      : 'cursor-pointer rounded-[4px] border border-transparent px-2.5 py-1 font-[520] text-[0.75rem] text-fg-muted transition-colors hover:text-fg'
                   }
                 >
                   {item.label}
@@ -128,7 +128,7 @@ export default function AdminPostsPage() {
 
             <Link
               href="/admin/posts/new"
-              className="rounded-sm border border-accent bg-accent px-3.5 py-2 font-[600] text-[0.8125rem] text-accent-fg transition-[filter] hover:brightness-105"
+              className="rounded-sm border border-fg bg-fg px-3.5 py-2 font-[600] text-[0.8125rem] text-bg transition-opacity hover:opacity-85"
             >
               새 글
             </Link>

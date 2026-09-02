@@ -16,6 +16,22 @@ export function formatDate(value: string | Date | null | undefined): string {
   return formatter.format(date)
 }
 
+/** 카드·글 머리의 날짜 메타. 디자인 시스템이 요일까지 붙인 긴 표기를 쓴다. */
+const longFormatter = new Intl.DateTimeFormat('ko-KR', {
+  timeZone: 'Asia/Seoul',
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  weekday: 'long',
+})
+
+export function formatDateLong(value: string | Date | null | undefined): string {
+  if (!value) return '—'
+  const date = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(date.getTime())) return '—'
+  return longFormatter.format(date)
+}
+
 /** <time datetime=""> 에 넣을 ISO 문자열. */
 export function toIsoDate(value: string | Date | null | undefined): string | undefined {
   if (!value) return undefined
