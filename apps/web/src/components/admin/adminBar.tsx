@@ -4,7 +4,10 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAdminSession } from '@/lib/useAdminSession'
 
-const NAV = [{ href: '/admin', label: '글' }]
+const NAV = [
+  { href: '/admin', label: '글' },
+  { href: '/admin/series', label: '시리즈' },
+]
 
 /** 어드민 상단 바. 스크롤해도 붙어 있고 배경을 살짝 흐린다. */
 export function AdminBar() {
@@ -53,7 +56,7 @@ export function AdminBar() {
           </button>
           <span
             title={admin?.login}
-            className="grid size-[1.6rem] shrink-0 place-items-center rounded-full border border-border bg-bg-elevated font-[560] text-[0.6875rem] text-fg-muted"
+            className="grid size-[1.6rem] shrink-0 place-items-center rounded-full border border-border bg-bg-subtle font-[560] text-[0.6875rem] text-fg-muted"
           >
             {admin?.login.slice(0, 2) ?? '··'}
           </span>
