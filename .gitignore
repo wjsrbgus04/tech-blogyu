@@ -23,3 +23,6 @@ out/
 .DS_Store
 coverage/
 *.tsbuildinfo
+
+# AI
+.claude/
