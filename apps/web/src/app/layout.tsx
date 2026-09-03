@@ -21,6 +21,18 @@ export const metadata: Metadata = {
     template: `%s · ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
+  /**
+   * 미리보기 크기 상한을 푼다. 기본값은 이미지를 작게, 스니펫을 짧게 자르므로
+   * Google Discover 와 리치 결과에 큰 이미지·긴 발췌가 실리지 않는다.
+   *
+   * index·follow 는 적지 않는다 — Next 가 404 응답에 noindex 메타를 따로 심는데,
+   * 여기서 index 를 선언하면 한 문서에 상반된 robots 메타가 둘 생긴다.
+   */
+  robots: {
+    'max-image-preview': 'large',
+    'max-snippet': -1,
+    'max-video-preview': -1,
+  },
   openGraph: {
     type: 'website',
     siteName: SITE_NAME,

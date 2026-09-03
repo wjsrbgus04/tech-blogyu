@@ -45,7 +45,9 @@ export async function generateMetadata({
   const { name } = await params
   const page = Math.max(1, Number((await searchParams).page ?? '1') || 1)
   const result = await loadTag(decodeURIComponent(name))
-  if (!result.ok) return { title: '태그를 찾을 수 없습니다' }
+  // 없는 태그(404)와 API 장애 화면 둘 다 색인 대상이 아니다 — 루트 robots 를 물려받지 않게 덮어쓴다
+  if (!result.ok)
+    return { title: '태그를 찾을 수 없습니다', robots: { index: false, follow: true } }
 
   const tag = result.data
   // 태그마다 고유한 description 을 준다 — 검색 유입 경로가 되기 때문이다

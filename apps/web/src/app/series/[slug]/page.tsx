@@ -34,7 +34,9 @@ function loadSeries(slug: string) {
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { slug } = await params
   const result = await loadSeries(slug)
-  if (!result.ok) return { title: '시리즈를 찾을 수 없습니다' }
+  // 없는 시리즈(404)와 API 장애 화면 둘 다 색인 대상이 아니다 — 루트 robots 를 물려받지 않게 덮어쓴다
+  if (!result.ok)
+    return { title: '시리즈를 찾을 수 없습니다', robots: { index: false, follow: true } }
 
   const series = result.data
   const description = series.description ?? `${series.title} 연재 ${series.count}편.`

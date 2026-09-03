@@ -48,7 +48,8 @@ function loadPost(slug: string) {
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { slug } = await params
   const result = await loadPost(slug)
-  if (!result.ok) return { title: '글을 찾을 수 없습니다' }
+  // 없는 글(404)과 API 장애 화면 둘 다 색인 대상이 아니다 — 루트 robots 를 물려받지 않게 덮어쓴다
+  if (!result.ok) return { title: '글을 찾을 수 없습니다', robots: { index: false, follow: true } }
 
   const { post, tags } = result.data
   const url = `${SITE_URL}/posts/${post.slug}`
@@ -111,6 +112,8 @@ export default async function PostPage({ params }: { params: Promise<Params> }) 
       updatedAt: toIsoDate(post.updatedAt),
       tags,
       imageUrl: postImageUrl(post.slug, post.coverImageUrl),
+      readingMinutes: post.readingMinutes,
+      seriesTitle: series?.title ?? null,
     }),
     breadcrumbLd([
       { name: '홈', path: '/' },

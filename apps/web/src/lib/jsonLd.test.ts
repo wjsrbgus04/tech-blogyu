@@ -10,6 +10,8 @@ const base = {
   publishedAt: '2026-08-28T08:12:12.033Z',
   updatedAt: '2026-08-29T01:00:00.000Z',
   imageUrl: 'https://example.test/og.png',
+  readingMinutes: 5,
+  seriesTitle: null,
 }
 
 describe('blogPostingLd', () => {
@@ -31,6 +33,17 @@ describe('blogPostingLd', () => {
 
     expect(ld.url).toContain('/posts/hello')
     expect(ld.mainEntityOfPage).toEqual({ '@type': 'WebPage', '@id': ld.url })
+  })
+
+  it('읽는 시간을 ISO 8601 기간으로 낸다', () => {
+    expect(blogPostingLd({ ...base, tags: [] }).timeRequired).toBe('PT5M')
+  })
+
+  it('시리즈가 있을 때만 articleSection 을 넣는다', () => {
+    expect(blogPostingLd({ ...base, tags: [] })).not.toHaveProperty('articleSection')
+    expect(blogPostingLd({ ...base, tags: [], seriesTitle: 'Next 연재' }).articleSection).toBe(
+      'Next 연재',
+    )
   })
 })
 

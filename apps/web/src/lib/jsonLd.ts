@@ -53,6 +53,8 @@ export function blogPostingLd(input: {
   updatedAt: string | undefined
   tags: string[]
   imageUrl: string
+  readingMinutes: number
+  seriesTitle: string | null
 }): JsonLd {
   const url = `${SITE_URL}/posts/${input.slug}`
 
@@ -72,6 +74,10 @@ export function blogPostingLd(input: {
     inLanguage: SITE_LANGUAGE,
     // 한국어라 어절 수로 센다. 정확한 통계가 아니라 글의 분량을 알리는 게 목적이다.
     wordCount: input.content.trim().split(/\s+/).length,
+    // ISO 8601 기간. 화면의 "N분 분량"과 같은 값이다.
+    timeRequired: `PT${input.readingMinutes}M`,
+    // 시리즈가 글의 섹션 역할을 한다 — 검색엔진이 연재를 한 주제로 묶어 본다
+    ...(input.seriesTitle ? { articleSection: input.seriesTitle } : {}),
     // 빈 배열을 내보내면 keywords:"" 가 나가므로 태그가 있을 때만 넣는다
     ...(input.tags.length > 0 ? { keywords: input.tags } : {}),
   }
