@@ -1,21 +1,4 @@
 import Link from 'next/link'
-import { api, cached } from '@/lib/apiClient'
-
-type SeriesItem = { slug: string; title: string }
-
-/** 내비에 올릴 시리즈 수. 한 줄에 들어가야 한다. */
-const NAV_SERIES = 4
-
-/** API 가 죽어도 글은 읽을 수 있어야 한다 — 내비만 비운다. */
-async function loadSeries(): Promise<SeriesItem[]> {
-  try {
-    const res = await api.series.$get(undefined, cached(['series']))
-    if (!res.ok) return []
-    return (await res.json()).items.slice(0, NAV_SERIES)
-  } catch {
-    return []
-  }
-}
 
 /** 로고 마크 — 파비콘(app/icon.svg)과 같은 글리프. 두 곳이 어긋나지 않게 값을 그대로 옮겼다. */
 function Mark() {
@@ -47,9 +30,7 @@ function Mark() {
  * 어긋나 보인다. 베이스라인으로 맞추고, 글자가 아닌 아이콘은 self-center 로 빼서
  * 컨테이너의 베이스라인이 글자에서 나오게 한다.
  */
-export async function SiteHeader() {
-  const series = await loadSeries()
-
+export function SiteHeader() {
   return (
     <header className="flex flex-wrap items-baseline gap-x-6 gap-y-4 py-7">
       <Link href="/" className="inline-flex items-baseline gap-2 text-[28px]">
@@ -67,11 +48,9 @@ export async function SiteHeader() {
         <Link href="/tags" className="nav-link">
           태그
         </Link>
-        {series.map((item) => (
-          <Link key={item.slug} href={`/series/${item.slug}`} className="nav-link">
-            {item.title}
-          </Link>
-        ))}
+        <Link href="/series" className="nav-link">
+          시리즈
+        </Link>
       </nav>
 
       <Link

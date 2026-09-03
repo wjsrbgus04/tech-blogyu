@@ -81,6 +81,7 @@ pnpm run deploy
 ```bash
 cd apps/web
 pnpm wrangler secret put REVALIDATE_SECRET   # api 와 같은 값
+pnpm wrangler secret put INDEXNOW_KEY        # 선택. 글 저장 시 Bing 계열에 즉시 색인 요청 (openssl rand -hex 16)
 pnpm run deploy
 ```
 

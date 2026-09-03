@@ -1,8 +1,12 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { JsonLd } from '@/components/jsonLd'
 import { Pagination } from '@/components/pagination'
 import { PostGrid, PostHero, type PostSummary } from '@/components/postGrid'
 import { Shell } from '@/components/shell'
 import { api, cached } from '@/lib/apiClient'
+import { websiteLd } from '@/lib/jsonLd'
+import { siteAlternates } from '@/lib/seo'
 
 // Next 의 segment config 는 정적 리터럴만 인식한다 (apiClient 의 REVALIDATE_SECONDS 와 같은 값)
 export const revalidate = 300
@@ -10,6 +14,26 @@ export const revalidate = 300
 const PAGE_SIZE = 10
 
 type Search = { page?: string }
+
+function pageParam(value: string | undefined): number {
+  return Math.max(1, Number(value ?? '1') || 1)
+}
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<Search>
+}): Promise<Metadata> {
+  const page = pageParam((await searchParams).page)
+
+  return {
+    // 2페이지가 홈을 canonical 로 가리키면 거기 실린 글 목록이 홈에 귀속되어
+    // 색인에서 사라진다. 페이지마다 자기 자신을 가리키게 한다.
+    alternates: siteAlternates(page > 1 ? `/?page=${page}` : '/'),
+    // 목록 페이지가 전부 같은 제목이면 검색 결과에서 중복으로 접힌다
+    ...(page > 1 ? { title: `${page}페이지` } : {}),
+  }
+}
 
 async function loadPosts(page: number) {
   try {
@@ -25,7 +49,7 @@ async function loadPosts(page: number) {
 }
 
 export default async function HomePage({ searchParams }: { searchParams: Promise<Search> }) {
-  const page = Math.max(1, Number((await searchParams).page ?? '1') || 1)
+  const page = pageParam((await searchParams).page)
   const data = await loadPosts(page)
   /**
    * 범위 밖 페이지는 빈 목록이 아니라 404 다.
@@ -51,6 +75,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
   return (
     <Shell>
+      {/* 검색 결과에 뜨는 사이트 이름을 이 구조화 데이터가 정한다 */}
+      <JsonLd data={websiteLd()} />
+
       <h1 className="sr-only">최근 글</h1>
 
       {hero && (

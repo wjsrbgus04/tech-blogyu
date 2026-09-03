@@ -27,6 +27,34 @@ const nextConfig: NextConfig = {
     ],
   },
 
+  /**
+   * 글 주소의 마크다운 협상. AI 에이전트가 `Accept: text/markdown` 으로 글 주소를
+   * 요청하면 HTML 대신 마크다운 원문(index.md)을 그대로 준다. 주소는 하나로 두고
+   * 표현만 바꾸는 것이라 rewrite 다 — redirect 로 주소를 바꾸면 인용 링크가
+   * index.md 로 굳는다.
+   *
+   * proxy.ts 로 하지 않는 이유: Node 런타임 proxy 가 있으면 OpenNext 가 미들웨어
+   * 번들에 Turbopack 런타임을 싣고, 거기에 @vercel/og 를 끼워 넣는 패치를 해서
+   * 워커가 gzip 기준 300KiB 넘게 커진다(무료 플랜 한도 3MiB). 설정 rewrite 는
+   * 라우팅 계층이 처리하므로 그 비용이 없다.
+   *
+   * 조건은 "Accept 에 text/markdown 이 들어 있다" 뿐이다. q 가중치까지 따지지는
+   * 않는다 — 브라우저는 text/markdown 을 보내지 않으므로 실제로는 충분하다.
+   * Next 는 값을 ^…$ 로 감싸고 OpenNext 는 감싸지 않으므로 양쪽에서 같게 읽히는
+   * 형태(앞뒤에 .* 를 붙인 부분 일치)로 쓴다.
+   */
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: '/posts/:slug',
+          has: [{ type: 'header', key: 'accept', value: '.*text/markdown.*' }],
+          destination: '/posts/:slug/index.md',
+        },
+      ],
+    }
+  },
+
   async headers() {
     return [
       {
@@ -36,6 +64,12 @@ const nextConfig: NextConfig = {
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
         ],
+      },
+      {
+        // 위 rewrite 로 같은 주소가 Accept 에 따라 다른 표현을 낸다. 중간 캐시가
+        // 이걸 모르면 에이전트가 받은 마크다운을 다음 브라우저에 그대로 돌려준다.
+        source: '/posts/:slug',
+        headers: [{ key: 'Vary', value: 'Accept' }],
       },
     ]
   },

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { PostGrid, type PostSummary } from '@/components/postGrid'
 import { Shell } from '@/components/shell'
 import { api, uncached } from '@/lib/apiClient'
+import { siteAlternates } from '@/lib/seo'
 
 // 검색 결과는 캐시하지 않는다 — 질의마다 다르고 크롤링 대상도 아니다
 export const dynamic = 'force-dynamic'
@@ -9,6 +10,8 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: '검색',
   robots: { index: false, follow: true },
+  // noindex 라도 canonical 은 자기 자신을 가리켜야 한다 — 안 그러면 홈을 물려받는다
+  alternates: siteAlternates('/search'),
 }
 
 type Search = { q?: string }

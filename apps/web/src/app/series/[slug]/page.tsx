@@ -1,10 +1,13 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { JsonLd } from '@/components/jsonLd'
 import { LoadError } from '@/components/loadError'
 import { PostGrid, type PostSummary } from '@/components/postGrid'
 import { Shell } from '@/components/shell'
 import { api, cached } from '@/lib/apiClient'
+import { breadcrumbLd, collectionPageLd } from '@/lib/jsonLd'
 import { loadOrFail } from '@/lib/loadResult'
+import { siteAlternates } from '@/lib/seo'
 
 // Next 의 segment config 는 정적 리터럴만 인식한다 (apiClient 의 REVALIDATE_SECONDS 와 같은 값)
 export const revalidate = 300
@@ -31,14 +34,16 @@ function loadSeries(slug: string) {
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { slug } = await params
   const result = await loadSeries(slug)
-  if (!result.ok) return { title: '시리즈를 찾을 수 없습니다' }
+  // 없는 시리즈(404)와 API 장애 화면 둘 다 색인 대상이 아니다 — 루트 robots 를 물려받지 않게 덮어쓴다
+  if (!result.ok)
+    return { title: '시리즈를 찾을 수 없습니다', robots: { index: false, follow: true } }
 
   const series = result.data
   const description = series.description ?? `${series.title} 연재 ${series.count}편.`
   return {
     title: series.title,
     description,
-    alternates: { canonical: `/series/${series.slug}` },
+    alternates: siteAlternates(`/series/${series.slug}`),
   }
 }
 
@@ -65,6 +70,22 @@ export default async function SeriesPage({ params }: { params: Promise<Params> }
 
   return (
     <Shell>
+      <JsonLd
+        data={[
+          collectionPageLd({
+            name: series.title,
+            description: series.description ?? `${series.title} 연재 ${series.count}편.`,
+            path: `/series/${series.slug}`,
+            items: posts,
+          }),
+          breadcrumbLd([
+            { name: '홈', path: '/' },
+            { name: '시리즈', path: '/series' },
+            { name: series.title, path: `/series/${series.slug}` },
+          ]),
+        ]}
+      />
+
       <header className="mb-12">
         <span className="label mb-3 block">시리즈</span>
         <h1 className="mb-4 text-display font-semibold">{series.title}</h1>

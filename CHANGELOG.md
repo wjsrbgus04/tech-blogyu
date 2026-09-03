@@ -1,5 +1,25 @@
 # 변경 이력
 
+## v0.3.0 — 검색엔진·AI 크롤러
+
+검색엔진과 AI 답변엔진이 글을 제대로 읽고, 고친 글이 바로 반영되게 했다. 설계는 `docs/architecture.md`의 "검색엔진·AI 크롤러 산출물" 절.
+
+### 들어간 것
+
+- 글 메타데이터·canonical·OG·JSON-LD(`WebSite`·`BlogPosting`·`CollectionPage`·`BreadcrumbList`) 정비. `BlogPosting`에 읽는 시간(`timeRequired`)과 시리즈(`articleSection`) 추가
+- 글 마크다운 원문 `/posts/<slug>/index.md`, `llms.txt`, `llms-full.txt`. 글 페이지가 `<link rel="alternate" type="text/markdown">`으로 원문을 가리킨다
+- `Accept: text/markdown` 협상 — AI 에이전트가 글 주소를 그대로 요청해도 마크다운을 받는다(`next.config.ts` rewrite)
+- `robots.txt`에 Content-Signal 선언(`search=yes, ai-input=yes, ai-train=yes`)과 AI 크롤러 그룹. `/api` 도 색인 제외
+- 루트 robots 메타 `max-image-preview:large`·`max-snippet:-1`·`max-video-preview:-1` — Discover·리치 결과의 전제
+- IndexNow 색인 알림 (`INDEXNOW_KEY` 시크릿)
+- RSS에 `lastBuildDate`와 글별 `<category>`(태그)
+
+### 고친 것
+
+- 재검증 웹훅이 경로만 보내 사이트맵·RSS·llms.txt·아카이브가 최대 1시간 옛 내용을 내던 것 — API가 캐시 태그도 함께 보내고, web은 글 경로의 `index.md`까지 비운다
+- 사이트맵의 시리즈 주소 인코딩을 태그·canonical과 같은 방식으로 통일
+- RSS 제목·설명이 사이트 상수와 어긋나 있던 것
+
 ## v0.2.0 — 디자인 시스템 v2
 
 화면을 `docs/design`("Neon zine on white paper")로 옮겼다. 흰 종이, 검정 잉크, 마젠타 한 색.

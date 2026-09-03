@@ -31,6 +31,17 @@ app.use('*', (c, next) =>
   })(c, next),
 )
 
+/**
+ * API 도메인이 따로 색인되지 않게 막는다. JSON 응답이 검색 결과에 뜨면
+ * 같은 내용으로 web 도메인과 경쟁한다.
+ *
+ * /media/* 는 뺀다 — 본문 이미지라서 이미지 검색에는 걸려야 한다.
+ */
+app.use('*', async (c, next) => {
+  await next()
+  if (!c.req.path.startsWith('/media/')) c.header('X-Robots-Tag', 'noindex')
+})
+
 /** 요청마다 db 를 만들어 컨텍스트에 싣는다. HTTP 드라이버라 생성 비용이 없다. */
 app.use('*', async (c, next) => {
   c.set('db', createDb(c.env.DATABASE_URL))
