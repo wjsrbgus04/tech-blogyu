@@ -5,6 +5,7 @@ import { HTTPException } from 'hono/http-exception'
 import { requireAdmin } from '../auth/session'
 import type { Db } from '../db/client'
 import { posts, postsToTags, series, tags } from '../db/schema'
+import { cacheTags } from '../lib/cacheTags'
 import type { AdminUser, Bindings } from '../lib/env'
 import { PG_UNIQUE_VIOLATION, pgConstraint, pgErrorCode } from '../lib/errors'
 import {
@@ -30,7 +31,9 @@ const ALLOWED_IMAGE_TYPES = new Set([
 ])
 
 /**
- * 글이 바뀌면 해당 경로만 즉시 갱신한다. 전체 재빌드 없이 몇 초 안에 반영된다.
+ * 글이 바뀌면 해당 경로를 즉시 갱신한다. 전체 재빌드 없이 몇 초 안에 반영된다.
+ * 경로와 함께 fetch 캐시 태그도 비운다 — 경로만 비우면 사이트맵·RSS·llms.txt 처럼
+ * 같은 목록을 읽는 다른 산출물이 캐시 주기(최대 1시간)가 끝날 때까지 옛 내용을 낸다.
  * 재검증 실패가 글 저장을 되돌리면 안 되므로 실패는 삼킨다.
  */
 async function revalidate(env: Bindings, paths: string[]): Promise<void> {
@@ -42,7 +45,7 @@ async function revalidate(env: Bindings, paths: string[]): Promise<void> {
         'Content-Type': 'application/json',
         'x-revalidate-secret': env.REVALIDATE_SECRET,
       },
-      body: JSON.stringify({ paths }),
+      body: JSON.stringify({ paths, tags: cacheTags(paths) }),
     })
   } catch {
     // 웹훅이 죽어도 글은 이미 저장됐다. 다음 ISR 주기에 어차피 갱신된다.
