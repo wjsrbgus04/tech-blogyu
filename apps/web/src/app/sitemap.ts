@@ -59,7 +59,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     if (seriesRes.ok) {
       for (const item of (await seriesRes.json()).items) {
         entries.push({
-          url: `${SITE_URL}/series/${encodeURIComponent(item.slug)}`,
+          // 태그와 같은 이유로 canonical 과 같은 방식(new URL)으로 인코딩한다
+          url: new URL(`/series/${item.slug}`, SITE_URL).href,
           changeFrequency: 'weekly',
           priority: 0.6,
         })

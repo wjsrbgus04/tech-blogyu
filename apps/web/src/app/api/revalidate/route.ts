@@ -32,7 +32,12 @@ export async function POST(request: Request) {
     return Response.json({ error: 'paths와 tags는 문자열 배열이어야 합니다.' }, { status: 400 })
   }
 
-  for (const path of paths as string[]) revalidatePath(path)
+  for (const path of paths as string[]) {
+    revalidatePath(path)
+    // 글 경로는 마크다운 원문(index.md)도 같이 비운다 — AI 크롤러가 읽는 쪽이
+    // HTML 보다 늦게 갱신되면 두 표현이 한동안 어긋난다
+    if (/^\/posts\/[^/]+$/.test(path)) revalidatePath(`${path}/index.md`)
+  }
   // 태그로 비우면 경로를 일일이 나열하지 않아도 관련 fetch 캐시가 함께 날아간다.
   // Next 16 부터 만료 시점을 명시해야 한다 — expire: 0 은 지금 당장 버리라는 뜻이다.
   for (const tag of tags as string[]) revalidateTag(tag, { expire: 0 })
