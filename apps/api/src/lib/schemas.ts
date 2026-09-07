@@ -77,7 +77,15 @@ export const postInputSchema = z.object({
         .string()
         .trim()
         .min(1, '빈 태그는 넣을 수 없습니다.')
-        .max(POST_LIMITS.tag, `태그가 너무 깁니다. ${POST_LIMITS.tag}자 안으로 줄여주세요.`),
+        .max(POST_LIMITS.tag, `태그가 너무 깁니다. ${POST_LIMITS.tag}자 안으로 줄여주세요.`)
+        /**
+         * 태그 이름은 그대로 주소 한 칸이 된다(/tags/<name>). 슬러그와 달리 한글을 쓰므로
+         * 문자를 좁게 막지는 않고, 주소를 깨뜨리는 것만 막는다.
+         *
+         * 특히 `%` 가 들어가면 그 태그 페이지가 통째로 500 이 된다 — 앱 코드가 아니라
+         * Next 라우팅 계층이 세그먼트를 풀다 던져서, 화면에서는 막을 방법이 없다.
+         */
+        .regex(/^[^%/?#\\]+$/, '태그에 % / ? # \\ 는 쓸 수 없습니다.'),
     )
     .max(POST_LIMITS.tagCount, `태그는 ${POST_LIMITS.tagCount}개까지 붙일 수 있습니다.`)
     .default([]),

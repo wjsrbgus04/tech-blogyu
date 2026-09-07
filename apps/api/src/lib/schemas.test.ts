@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { seriesInputSchema, seriesPatchSchema } from './schemas'
+import { postInputSchema, seriesInputSchema, seriesPatchSchema } from './schemas'
 
 describe('seriesInputSchema', () => {
   it('슬러그·제목만 있으면 통과하고 설명은 비워둘 수 있다', () => {
@@ -34,5 +34,31 @@ describe('seriesPatchSchema', () => {
   it('일부 필드만 보내도 되지만, 보낸 필드는 규칙을 따라야 한다', () => {
     expect(seriesPatchSchema.safeParse({ title: '새 제목' }).success).toBe(true)
     expect(seriesPatchSchema.safeParse({ slug: 'Bad Slug' }).success).toBe(false)
+  })
+})
+
+describe('태그 이름 문자 제한', () => {
+  const parse = (tag: string) =>
+    postInputSchema.safeParse({
+      slug: 'a-post',
+      title: '제목',
+      excerpt: '요약',
+      content: '본문',
+      status: 'draft' as const,
+      tags: [tag],
+    })
+
+  it('한글·영문·숫자·하이픈은 받는다', () => {
+    for (const tag of ['drizzle', '한글태그', 'next-js', 'c++', 'a.b']) {
+      expect(parse(tag).success).toBe(true)
+    }
+  })
+
+  // 태그 이름은 그대로 주소 한 칸이 된다. `%` 가 들어가면 그 태그 페이지가
+  // 통째로 500 이 되는데, Next 라우팅 계층이 던지는 것이라 화면에서는 막을 수 없다.
+  it('주소를 깨뜨리는 문자는 거른다', () => {
+    for (const tag of ['100%', 'a/b', 'a?b', 'a#b', 'a\\b']) {
+      expect(parse(tag).success).toBe(false)
+    }
   })
 })
