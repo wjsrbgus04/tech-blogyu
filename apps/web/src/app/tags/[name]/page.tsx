@@ -1,19 +1,11 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { JsonLd } from '@/components/jsonLd'
-import { LoadError } from '@/components/loadError'
-import { Pagination } from '@/components/pagination'
-import { PostGrid, type PostSummary } from '@/components/postGrid'
-import { Shell } from '@/components/shell'
+import { TagArchivePage, tagArchiveMetadata } from '@/components/tagArchivePage'
 import { api, cached } from '@/lib/apiClient'
-import { breadcrumbLd, collectionPageLd } from '@/lib/jsonLd'
-import { loadOrFail } from '@/lib/loadResult'
-import { siteAlternates } from '@/lib/seo'
+import { decodeSegment } from '@/lib/seo'
 
 // Next 의 segment config 는 정적 리터럴만 인식한다 (apiClient 의 REVALIDATE_SECONDS 와 같은 값)
 export const revalidate = 300
-
-const PAGE_SIZE = 10
 
 type Params = { name: string }
 
@@ -27,111 +19,15 @@ export async function generateStaticParams() {
     return []
   }
 }
-type Search = { page?: string }
 
-type Tag = { name: string; description: string | null; count: number }
-
-function loadTag(name: string) {
-  return loadOrFail<Tag>(() => api.tags[':name'].$get({ param: { name } }, cached(['tags'])))
+export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
+  const name = decodeSegment((await params).name)
+  if (!name) return { title: '태그를 찾을 수 없습니다', robots: { index: false, follow: true } }
+  return tagArchiveMetadata(name, 1)
 }
 
-export async function generateMetadata({
-  params,
-  searchParams,
-}: {
-  params: Promise<Params>
-  searchParams: Promise<Search>
-}): Promise<Metadata> {
-  const { name } = await params
-  const page = Math.max(1, Number((await searchParams).page ?? '1') || 1)
-  const result = await loadTag(decodeURIComponent(name))
-  // 없는 태그(404)와 API 장애 화면 둘 다 색인 대상이 아니다 — 루트 robots 를 물려받지 않게 덮어쓴다
-  if (!result.ok)
-    return { title: '태그를 찾을 수 없습니다', robots: { index: false, follow: true } }
-
-  const tag = result.data
-  // 태그마다 고유한 description 을 준다 — 검색 유입 경로가 되기 때문이다
-  const description = tag.description ?? `${tag.name} 태그가 붙은 글 ${tag.count}편.`
-  const path = `/tags/${tag.name}`
-
-  return {
-    title: page > 1 ? `#${tag.name} · ${page}페이지` : `#${tag.name}`,
-    description,
-    alternates: siteAlternates(page > 1 ? `${path}?page=${page}` : path),
-  }
-}
-
-export default async function TagArchivePage({
-  params,
-  searchParams,
-}: {
-  params: Promise<Params>
-  searchParams: Promise<Search>
-}) {
-  const name = decodeURIComponent((await params).name)
-  const page = Math.max(1, Number((await searchParams).page ?? '1') || 1)
-
-  const result = await loadTag(name)
-  // 태그가 없는 것과 API 가 죽은 것을 구분한다
-  if (!result.ok && result.reason === 'notFound') notFound()
-  if (!result.ok) {
-    return (
-      <Shell>
-        <LoadError label="태그" />
-      </Shell>
-    )
-  }
-  const tag = result.data
-
-  let posts: PostSummary[] = []
-  let totalPages = 1
-  try {
-    const res = await api.posts.$get(
-      { query: { tag: name, page: String(page), limit: String(PAGE_SIZE) } },
-      cached(['posts']),
-    )
-    if (res.ok) {
-      const data = await res.json()
-      posts = data.items as PostSummary[]
-      totalPages = data.totalPages
-    }
-  } catch {
-    // 글을 못 불러와도 태그 헤더는 보여준다
-  }
-
-  // 범위 밖 페이지는 404 (홈과 같은 이유)
-  if (page > 1 && page > totalPages) notFound()
-
-  return (
-    <Shell>
-      <JsonLd
-        data={[
-          collectionPageLd({
-            name: `#${tag.name}`,
-            description: tag.description ?? `${tag.name} 태그가 붙은 글 ${tag.count}편.`,
-            path: `/tags/${tag.name}`,
-            items: posts,
-          }),
-          breadcrumbLd([
-            { name: '홈', path: '/' },
-            { name: '태그', path: '/tags' },
-            { name: `#${tag.name}`, path: `/tags/${tag.name}` },
-          ]),
-        ]}
-      />
-
-      <header className="mb-12">
-        <h1 className="mb-4 text-display font-semibold">
-          <span className="text-accent">#</span>
-          {tag.name}
-        </h1>
-        <p className="max-w-[46ch] text-body-lg">
-          {tag.description ?? `${tag.name} 태그가 붙은 글 ${tag.count}편.`}
-        </p>
-      </header>
-
-      <PostGrid items={posts} />
-      <Pagination page={page} totalPages={totalPages} basePath={`/tags/${tag.name}`} />
-    </Shell>
-  )
+export default async function TagPage({ params }: { params: Promise<Params> }) {
+  const name = decodeSegment((await params).name)
+  if (!name) notFound()
+  return <TagArchivePage name={name} page={1} />
 }

@@ -34,12 +34,18 @@ const ALLOWED_IMAGE_TYPES = new Set([
  * 글이 바뀌면 해당 경로를 즉시 갱신한다. 전체 재빌드 없이 몇 초 안에 반영된다.
  * 경로와 함께 fetch 캐시 태그도 비운다 — 경로만 비우면 사이트맵·RSS·llms.txt 처럼
  * 같은 목록을 읽는 다른 산출물이 캐시 주기(최대 1시간)가 끝날 때까지 옛 내용을 낸다.
- * 재검증 실패가 글 저장을 되돌리면 안 되므로 실패는 삼킨다.
+ *
+ * 재검증 실패가 글 저장을 되돌리면 안 되므로 예외는 삼킨다. 다만 조용히 삼키지는
+ * 않는다 — 시크릿이 빠졌거나 웹훅이 거부당하면 발행한 글이 화면에 안 나오는데,
+ * 로그가 없으면 밖에서는 그 원인을 알아낼 방법이 없다.
  */
 async function revalidate(env: Bindings, paths: string[]): Promise<void> {
-  if (!env.REVALIDATE_SECRET) return
+  if (!env.REVALIDATE_SECRET) {
+    console.warn('[revalidate] REVALIDATE_SECRET 이 없어 웹훅을 보내지 않았습니다', paths)
+    return
+  }
   try {
-    await fetch(`${env.SITE_URL}/api/revalidate`, {
+    const res = await fetch(`${env.SITE_URL}/api/revalidate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -47,8 +53,10 @@ async function revalidate(env: Bindings, paths: string[]): Promise<void> {
       },
       body: JSON.stringify({ paths, tags: cacheTags(paths) }),
     })
-  } catch {
+    if (!res.ok) console.warn(`[revalidate] 웹훅이 ${res.status} 를 냈습니다`, paths)
+  } catch (error) {
     // 웹훅이 죽어도 글은 이미 저장됐다. 다음 ISR 주기에 어차피 갱신된다.
+    console.warn('[revalidate] 웹훅 호출에 실패했습니다', error)
   }
 }
 

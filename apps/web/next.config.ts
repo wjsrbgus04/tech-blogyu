@@ -55,6 +55,34 @@ const nextConfig: NextConfig = {
     }
   },
 
+  /**
+   * 옛 페이지네이션 주소(`?page=N`)를 새 경로로 넘긴다.
+   *
+   * 목록 화면이 더는 searchParams 를 읽지 않으므로, 이 규칙이 없으면 이미 색인되거나
+   * 남의 글에 걸린 `/?page=2` 가 조용히 1페이지를 200 으로 낸다 — 크롤러에는 서로 다른
+   * 주소가 같은 내용을 내는 중복으로, 사람에게는 눌러도 안 넘어가는 링크로 보인다.
+   * 주소가 영구히 바뀐 것이므로 308 이다.
+   *
+   * 값 정규식을 ^…$ 로 직접 감싸는 이유: 감싸지 않으면 '02' 안의 '2' 에 부분 매칭돼
+   * `:n` 이 치환되지 않은 `/page/:n` 로 리다이렉트된다(실측). 위 rewrite 주석과 같은 교훈이다.
+   */
+  async redirects() {
+    return [
+      {
+        source: '/',
+        has: [{ type: 'query', key: 'page', value: '^(?<n>[2-9]|[1-9][0-9]{1,5})$' }],
+        destination: '/page/:n',
+        permanent: true,
+      },
+      {
+        source: '/tags/:name',
+        has: [{ type: 'query', key: 'page', value: '^(?<n>[2-9]|[1-9][0-9]{1,5})$' }],
+        destination: '/tags/:name/page/:n',
+        permanent: true,
+      },
+    ]
+  },
+
   async headers() {
     return [
       {

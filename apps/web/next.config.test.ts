@@ -49,3 +49,40 @@ describe('마크다운 협상 rewrite', () => {
     expect(rule?.headers).toContainEqual({ key: 'Vary', value: 'Accept' })
   })
 })
+
+describe('옛 페이지네이션 주소 redirect', () => {
+  async function rules() {
+    return (await nextConfig.redirects?.()) ?? []
+  }
+
+  it('홈과 태그 아카이브의 ?page=N 을 경로로 넘긴다', async () => {
+    const list = await rules()
+    expect(list).toContainEqual(
+      expect.objectContaining({ source: '/', destination: '/page/:n', permanent: true }),
+    )
+    expect(list).toContainEqual(
+      expect.objectContaining({
+        source: '/tags/:name',
+        destination: '/tags/:name/page/:n',
+        permanent: true,
+      }),
+    )
+  })
+
+  /**
+   * 값 정규식을 **있는 그대로** 쓴다. 테스트가 임의로 ^…$ 를 붙이면 앵커가 빠진 규칙도
+   * 통과해버린다 — 실제로 그렇게 놓친 적이 있다. 앵커 없이 '02' 를 넣으면 안쪽 '2' 에
+   * 부분 매칭돼 `:n` 이 치환되지 않은 `/page/:n` 으로 리다이렉트된다.
+   */
+  it('page=1 과 변형 표기는 넘기지 않는다', async () => {
+    for (const rule of await rules()) {
+      const has = rule.has?.find((item) => item.type === 'query' && item.key === 'page')
+      if (!has?.value) throw new Error('page 쿼리 조건이 없다')
+      const matcher = new RegExp(has.value)
+      for (const value of ['2', '10', '999999']) expect(matcher.test(value)).toBe(true)
+      for (const value of ['1', '0', '02', '2.0', 'abc', '', '1000000', 'x2x']) {
+        expect(matcher.test(value)).toBe(false)
+      }
+    }
+  })
+})
