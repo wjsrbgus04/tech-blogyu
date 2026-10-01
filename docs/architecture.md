@@ -49,6 +49,8 @@ AUTH_COOKIE_DOMAIN=".blogyu.dev"
 
 **주소는 하나, 표현은 여럿.** 글의 대표 주소는 `/posts/<slug>`뿐이다. `index.md`는 `Link: rel="canonical"` 헤더로, `Accept` 협상은 redirect가 아닌 rewrite로 그 주소를 지킨다. 협상은 `proxy.ts`가 아니라 `next.config.ts`의 헤더 조건부 rewrite다 — Node 런타임 proxy가 있으면 OpenNext가 미들웨어 번들에 Turbopack 런타임과 `@vercel/og`를 끼워 넣어 워커가 gzip 기준 300KiB 넘게 커진다. proxy가 필요해지면 그 비용부터 잰다. 태그·시리즈 주소는 canonical·사이트맵·JSON-LD가 전부 `new URL()` 방식으로 인코딩한다 — `encodeURIComponent`를 섞으면 색인이 갈라진다.
 
+**글이 한 편뿐인 태그·시리즈는 색인하지 않는다.** 글 페이지의 중복이라 얇은 페이지로 읽히고, 사이트맵에 섞이면 사이트 전체의 크롤링 우선순위가 떨어져 글까지 "발견됨 - 현재 색인이 생성되지 않음"에 머문다(2026-09 Search Console 실측). 기준은 `lib/seo.ts`의 `isIndexableList` 하나이고, 사이트맵 포함 여부와 `noindex, follow` 메타가 같이 쓴다. `/tags`·`/series` 색인 페이지도 색인 대상 목록이 하나 이상일 때만 색인한다.
+
 **robots.txt는 라우트 핸들러다.** Next의 `robots.ts`는 `Content-Signal`(크롤러가 가져간 내용을 검색·AI 답변·AI 학습에 써도 되는지 선언, contentsignals.org) 줄을 낼 수 없다. 정책은 `search=yes, ai-input=yes, ai-train=yes`이고, 바꿀 때는 같은 파일의 AI 크롤러 그룹도 같이 맞춘다. Cloudflare 대시보드의 AI 크롤러 차단이 켜져 있으면 여기서 열어도 엣지에서 먼저 막힌다.
 
 **재검증은 경로와 태그를 함께 비운다.** 어드민이 글을 저장하면 API가 `/api/revalidate`에 `paths`(홈·글)와 `tags`를 보낸다. 태그는 `apps/api/src/lib/cacheTags.ts`가 경로에서 만든다 — 목록 태그(`posts`·`tags`·`series`)는 늘, 글 경로가 있으면 `post:<slug>`도. 경로만 비우면 그 페이지 하나만 새로 그려지고, 같은 목록을 읽는 사이트맵·RSS·llms.txt·아카이브는 캐시 주기(최대 1시간)가 끝날 때까지 옛 내용을 낸다. 태그 이름은 web의 `cached([...])` 호출부와 맞춰야 한다. 캐시를 비운 뒤 IndexNow에 같은 경로를 알린다.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { decodeSegment, pageHref, parsePageParam, siteAlternates } from './seo'
+import { decodeSegment, isIndexableList, pageHref, parsePageParam, siteAlternates } from './seo'
 
 describe('pageHref', () => {
   it('1페이지는 기준 경로 그대로다', () => {
@@ -72,5 +72,15 @@ describe('decodeSegment', () => {
     for (const value of ['%', '%zz', '%E0%A4%A', 'p%25z%']) {
       expect(decodeSegment(value)).toBeNull()
     }
+  })
+})
+
+describe('isIndexableList', () => {
+  // 글 한 편짜리 태그·시리즈는 글 페이지의 중복이다. 사이트맵에 섞이면
+  // Google 이 사이트 전체의 크롤링 우선순위를 낮춘다("발견됨 - 색인 안 됨").
+  it('글이 두 편 이상인 목록만 색인한다', () => {
+    expect(isIndexableList(0)).toBe(false)
+    expect(isIndexableList(1)).toBe(false)
+    expect(isIndexableList(2)).toBe(true)
   })
 })
