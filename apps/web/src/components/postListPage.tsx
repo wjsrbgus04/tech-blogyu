@@ -6,7 +6,7 @@ import { PostGrid, PostHero, type PostSummary } from '@/components/postGrid'
 import { Shell } from '@/components/shell'
 import { api, cached } from '@/lib/apiClient'
 import { websiteLd } from '@/lib/jsonLd'
-import { pageHref, siteAlternates } from '@/lib/seo'
+import { pageHref, SITE_TITLE, siteAlternates } from '@/lib/seo'
 
 export const PAGE_SIZE = 10
 
@@ -78,7 +78,7 @@ export async function PostListPage({ page }: { page: number }) {
       {/* 검색 결과에 뜨는 사이트 이름을 이 구조화 데이터가 정한다 */}
       <JsonLd data={websiteLd()} />
 
-      <h1 className="sr-only">최근 글</h1>
+      <h1 className="sr-only">{SITE_TITLE}</h1>
 
       {hero && (
         <section className="mb-12">

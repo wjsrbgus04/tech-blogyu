@@ -7,7 +7,7 @@ import { Shell } from '@/components/shell'
 import { api, cached } from '@/lib/apiClient'
 import { breadcrumbLd, collectionPageLd } from '@/lib/jsonLd'
 import { loadOrFail } from '@/lib/loadResult'
-import { siteAlternates } from '@/lib/seo'
+import { isIndexableList, siteAlternates } from '@/lib/seo'
 
 // Next 의 segment config 는 정적 리터럴만 인식한다 (apiClient 의 REVALIDATE_SECONDS 와 같은 값)
 export const revalidate = 300
@@ -44,6 +44,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     title: series.title,
     description,
     alternates: siteAlternates(`/series/${series.slug}`),
+    ...(isIndexableList(series.count) ? {} : { robots: { index: false, follow: true } }),
   }
 }
 

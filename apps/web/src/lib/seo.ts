@@ -2,7 +2,14 @@ import type { Metadata } from 'next'
 import { SITE_URL } from '@/lib/apiClient'
 
 export const SITE_NAME = 'blogyu'
-export const SITE_DESCRIPTION = '직접 경험한 것과 해결해본 것에 대해 씁니다. 대체로 실패한 이야기.'
+/**
+ * 홈의 <title> 과 H1. 브랜드 이름만으로는 검색어에 걸리지 않아 주제어를 붙인다.
+ * SITE_NAME 에 붙이지 않는 이유: WebSite JSON-LD 의 name 이 검색 결과에 뜨는
+ * 사이트 이름을 정하는데, 그 자리에는 브랜드만 있어야 한다.
+ */
+export const SITE_TITLE = `${SITE_NAME} - AI 코딩 에이전트와 웹 개발 실패 기록`
+export const SITE_DESCRIPTION =
+  '코딩 에이전트, Next.js, Cloudflare Workers, Postgres를 실제로 쓰며 부딪힌 문제와 해결 과정을 씁니다. 대체로 실패한 이야기.'
 export const SITE_LOCALE = 'ko_KR'
 /** JSON-LD 의 inLanguage 는 BCP 47 을 쓴다 — og:locale 의 밑줄 표기와 다르다. */
 export const SITE_LANGUAGE = 'ko-KR'
@@ -78,6 +85,16 @@ export function decodeSegment(value: string): string | null {
   } catch {
     return null
   }
+}
+
+/**
+ * 태그·시리즈 목록을 색인 대상으로 둘지. 글이 한 편뿐인 목록은 그 글 페이지의 중복이라
+ * 검색엔진이 얇은 페이지로 본다 — 사이트맵에 섞이면 Google 이 사이트 전체의 크롤링
+ * 우선순위를 낮춰 정작 글까지 "발견됨 - 현재 색인이 생성되지 않음"에 머문다(2026-09 실측).
+ * 사이트맵과 robots 메타가 이 함수 하나를 같이 쓴다.
+ */
+export function isIndexableList(count: number): boolean {
+  return count >= 2
 }
 
 /** 글 본문 마크다운을 그대로 받아 가는 주소. AI 크롤러가 렌더된 HTML 대신 읽는다. */

@@ -8,7 +8,7 @@ import { Shell } from '@/components/shell'
 import { api, cached } from '@/lib/apiClient'
 import { breadcrumbLd, collectionPageLd } from '@/lib/jsonLd'
 import { loadOrFail } from '@/lib/loadResult'
-import { pageHref, siteAlternates } from '@/lib/seo'
+import { isIndexableList, pageHref, siteAlternates } from '@/lib/seo'
 
 export const PAGE_SIZE = 10
 
@@ -71,6 +71,7 @@ export async function tagArchiveMetadata(name: string, page: number): Promise<Me
     // 태그마다 고유한 description 을 준다 — 검색 유입 경로가 되기 때문이다
     description: tagDescription(tag),
     alternates: siteAlternates(pageHref(path, page)),
+    ...(isIndexableList(tag.count) ? {} : { robots: { index: false, follow: true } }),
   }
 }
 

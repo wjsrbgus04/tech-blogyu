@@ -5,6 +5,12 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8787'
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
+  /**
+   * AI 에이전트가 `next dev` 를 띄우면 Next 가 apps/web 에 AGENTS.md·CLAUDE.md 를 만든다.
+   * 에이전트 지침은 직접 쓴 것만 두므로 자동 생성을 끈다.
+   */
+  agentRules: false,
+
   // @blogyu/api 는 타입만 import 하므로 런타임 번들에 들어가지 않는다.
 
   /**

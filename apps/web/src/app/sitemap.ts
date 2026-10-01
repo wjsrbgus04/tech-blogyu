@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { api, cached, SITE_URL } from '@/lib/apiClient'
 import { fetchAllPosts, type PostListItem } from '@/lib/posts'
+import { isIndexableList } from '@/lib/seo'
 
 export const revalidate = 3600
 
@@ -20,13 +21,12 @@ function lastModified(post: PostListItem): Date | undefined {
   return Number.isNaN(date.getTime()) ? undefined : date
 }
 
-/** 사이트맵은 발행된 글 전체와 아카이브 페이지를 담는다. */
+/**
+ * 사이트맵은 발행된 글 전체와 색인 대상 아카이브(`isIndexableList`)를 담는다.
+ * 태그·시리즈 색인 페이지(`/tags`·`/series`)는 색인 대상 목록이 하나라도 있을 때만 넣는다.
+ */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const entries: MetadataRoute.Sitemap = [
-    { url: SITE_URL, changeFrequency: 'daily', priority: 1 },
-    { url: `${SITE_URL}/tags`, changeFrequency: 'weekly', priority: 0.5 },
-    { url: `${SITE_URL}/series`, changeFrequency: 'weekly', priority: 0.5 },
-  ]
+  const entries: MetadataRoute.Sitemap = [{ url: SITE_URL, changeFrequency: 'daily', priority: 1 }]
 
   for (const post of await fetchAllPosts()) {
     entries.push({
@@ -44,7 +44,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ])
 
     if (tagsRes.ok) {
-      for (const tag of (await tagsRes.json()).items) {
+      const tags = (await tagsRes.json()).items.filter((tag) => isIndexableList(tag.count))
+      if (tags.length > 0) {
+        entries.push({ url: `${SITE_URL}/tags`, changeFrequency: 'weekly', priority: 0.5 })
+      }
+      for (const tag of tags) {
         entries.push({
           // 한글 태그가 그대로 들어가면 <loc> 가 사이트맵 스펙에 어긋난다.
           // canonical 과 같은 방식(new URL)으로 인코딩한다 — encodeURIComponent 는
@@ -57,7 +61,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
 
     if (seriesRes.ok) {
-      for (const item of (await seriesRes.json()).items) {
+      const series = (await seriesRes.json()).items.filter((item) => isIndexableList(item.count))
+      if (series.length > 0) {
+        entries.push({ url: `${SITE_URL}/series`, changeFrequency: 'weekly', priority: 0.5 })
+      }
+      for (const item of series) {
         entries.push({
           // 태그와 같은 이유로 canonical 과 같은 방식(new URL)으로 인코딩한다
           url: new URL(`/series/${item.slug}`, SITE_URL).href,
