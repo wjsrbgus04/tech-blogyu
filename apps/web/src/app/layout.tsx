@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import { SITE_URL } from '@/lib/apiClient'
 import { jetbrainsMono, pretendard } from '@/lib/fonts'
-import { SITE_DESCRIPTION, SITE_LOCALE, SITE_NAME } from '@/lib/seo'
+import { SITE_DESCRIPTION, SITE_LOCALE, SITE_NAME, SITE_TITLE } from '@/lib/seo'
 import './globals.css'
 
 /** 서치 콘솔·서치어드바이저 소유 확인 값. 없으면 태그를 아예 내보내지 않는다. */
@@ -17,7 +17,7 @@ const naverVerification = process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: SITE_NAME,
+    default: SITE_TITLE,
     template: `%s · ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,

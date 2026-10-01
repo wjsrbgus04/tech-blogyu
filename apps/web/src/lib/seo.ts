@@ -2,7 +2,14 @@ import type { Metadata } from 'next'
 import { SITE_URL } from '@/lib/apiClient'
 
 export const SITE_NAME = 'blogyu'
-export const SITE_DESCRIPTION = '직접 경험한 것과 해결해본 것에 대해 씁니다. 대체로 실패한 이야기.'
+/**
+ * 홈의 <title> 과 H1. 브랜드 이름만으로는 검색어에 걸리지 않아 주제어를 붙인다.
+ * SITE_NAME 에 붙이지 않는 이유: WebSite JSON-LD 의 name 이 검색 결과에 뜨는
+ * 사이트 이름을 정하는데, 그 자리에는 브랜드만 있어야 한다.
+ */
+export const SITE_TITLE = `${SITE_NAME} - AI 코딩 에이전트와 웹 개발 실패 기록`
+export const SITE_DESCRIPTION =
+  '코딩 에이전트, Next.js, Cloudflare Workers, Postgres를 실제로 쓰며 부딪힌 문제와 해결 과정을 씁니다. 대체로 실패한 이야기.'
 export const SITE_LOCALE = 'ko_KR'
 /** JSON-LD 의 inLanguage 는 BCP 47 을 쓴다 — og:locale 의 밑줄 표기와 다르다. */
 export const SITE_LANGUAGE = 'ko-KR'
