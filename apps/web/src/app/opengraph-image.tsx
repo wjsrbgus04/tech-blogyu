@@ -1,6 +1,7 @@
 import { ImageResponse } from 'next/og'
 import { loadOgFont } from '@/lib/ogFont'
 import { OG, OG_SIZE } from '@/lib/ogTheme'
+import { SITE_DESCRIPTION } from '@/lib/seo'
 
 export const alt = 'blogyu'
 export const size = OG_SIZE
@@ -28,7 +29,7 @@ export default async function Image() {
         <div style={{ fontSize: 64, color: OG.fg, letterSpacing: -2 }}>blogyu</div>
       </div>
       <div style={{ marginTop: 28, fontSize: 32, color: OG.fgMuted, lineHeight: 1.5 }}>
-        직접 경험한 것과 해결해본 것에 대해 씁니다.
+        {SITE_DESCRIPTION}
       </div>
     </div>,
     { ...size, fonts: [{ name: 'Pretendard', data: font, weight: 700, style: 'normal' }] },
